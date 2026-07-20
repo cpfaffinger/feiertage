@@ -10,9 +10,10 @@ Basierend auf dem Go-Projekt [wlbr/feiertage](https://github.com/wlbr/feiertage)
 - Bewegliche Feiertage per Gauß-Osterformel (Ostern, Karfreitag, Pfingsten, etc.)
 - Spezielle Tage (Advent, Thanksgiving, Sommer-/Winterzeit, etc.)
 - **Public API** — keine Authentifizierung, kein API-Key, keine Limits
+- **Multi-Format Support**: JSON, XML, CSV, TSV, TXT
 - **Swagger UI** (`/docs`) und **ReDoc** (`/redoc`)
 - **Web-Frontend** mit Live-API-Testing
-- **100% Test Coverage** — 724 Tests, verifiziert gegen Go-Referenz
+- **100% Test Coverage** — 763 Tests, verifiziert gegen Go-Referenz
 
 ## Quickstart (Docker)
 
@@ -37,6 +38,8 @@ uvicorn app.main:app --reload --port 8000
 
 ## API Endpunkte
 
+Alle Endpunkte unterstützen den `?format=` Parameter: `json` (default), `xml`, `csv`, `tsv`, `txt`.
+
 | Methode | Pfad | Beschreibung |
 |---------|------|-------------|
 | `GET` | `/` | Web-Frontend mit API-Dokumentation |
@@ -51,6 +54,25 @@ uvicorn app.main:app --reload --port 8000
 | `GET` | `/api/feiertage?year=2026&region=Berlin` | Nach Region gefiltert |
 | `GET` | `/api/feiertage/2026-12-25` | Feiertage an einem Datum |
 | `GET` | `/api/easter?year=2026` | Osterdatum (Gauß) |
+
+### Format-Beispiele
+
+```bash
+# JSON (default)
+curl "http://localhost:8000/api/region/Bayern?year=2026"
+
+# XML
+curl "http://localhost:8000/api/region/Bayern?year=2026&format=xml"
+
+# CSV
+curl "http://localhost:8000/api/feiertage?year=2026&format=csv"
+
+# TSV
+curl "http://localhost:8000/api/feiertage?year=2026&format=tsv"
+
+# Plain Text
+curl "http://localhost:8000/api/easter?year=2026&format=txt"
+``` |
 
 ## Regionen
 
@@ -73,7 +95,7 @@ pytest tests/ -v --cov=app --cov-report=term-missing
 docker compose exec feiertage python -m pytest tests/ -v --cov=app
 ```
 
-**Ergebnis:** 724 Tests, 100% Coverage — alle Werte gegen die Go-Referenzimplementierung verifiziert.
+**Ergebnis:** 763 Tests, 100% Coverage — alle Werte gegen die Go-Referenzimplementierung verifiziert.
 
 ## Konfiguration
 
@@ -96,12 +118,14 @@ feiertage/
 ├── app/
 │   ├── feiertage.py          # 60+ Feiertagsfunktionen
 │   ├── region.py             # Region-Logik (DE + AT)
+│   ├── formatter.py          # JSON / XML / CSV / TSV / TXT
 │   ├── main.py               # FastAPI App
 │   └── static/
 │       └── index.html        # Web-Frontend
 └── tests/
     ├── test_feiertage.py     # Feiertags-Berechnungen
     ├── test_region.py        # Region-Logik
+    ├── test_formatter.py     # Format-Konverter Tests
     ├── test_api.py           # API-Endpunkte
     └── test_go_comparison.py # Go vs. Python Vergleich
 ```

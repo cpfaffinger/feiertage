@@ -146,6 +146,13 @@
                 <option value="">-- Select region --</option>
             </select>
             <input type="number" id="year-input" value="2026" min="1900" max="2100" style="width:80px">
+            <select id="format-select" style="min-width:80px">
+                <option value="json">JSON</option>
+                <option value="xml">XML</option>
+                <option value="csv">CSV</option>
+                <option value="tsv">TSV</option>
+                <option value="txt">TXT</option>
+            </select>
             <label><input type="checkbox" id="sunday-check"> Include Sundays</label>
             <button onclick="tryApi()">Query</button>
             <div class="result" id="result-box">Click "Query" to see results...</div>
@@ -183,20 +190,21 @@
             const region = sel.value;
             const year = document.getElementById('year-input').value;
             const sunday = document.getElementById('sunday-check').checked;
+            const fmt = document.getElementById('format-select').value;
             const box = document.getElementById('result-box');
 
             let url;
             if (region) {
-                url = `/api/region/${encodeURIComponent(region)}?year=${year}&inkl_sonntage=${sunday}`;
+                url = `/api/region/${encodeURIComponent(region)}?year=${year}&inkl_sonntage=${sunday}&format=${fmt}`;
             } else {
-                url = `/api/regions?year=${year}&inkl_sonntage=${sunday}`;
+                url = `/api/regions?year=${year}&inkl_sonntage=${sunday}&format=${fmt}`;
             }
 
             box.textContent = 'Loading...';
             try {
                 const r = await fetch(url);
-                const data = await r.json();
-                box.textContent = JSON.stringify(data, null, 2);
+                const text = await r.text();
+                box.textContent = text;
             } catch(e) {
                 box.textContent = 'Error: ' + e.message;
             }

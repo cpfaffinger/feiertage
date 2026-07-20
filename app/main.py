@@ -4,11 +4,13 @@ This API provides access to public holidays in all German federal states (Bundes
 and Austrian states, as well as various special days.
 
 No authentication required - completely open and public.
+
+Supported output formats: json, xml, csv, tsv, txt
 """
 from datetime import date
 from typing import Optional
 from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from app.region import (
     get_all_regions,
@@ -17,6 +19,7 @@ from app.region import (
     get_feiertage_for_date,
 )
 from app.feiertage import Feiertag
+from app.formatter import format_response, AVAILABLE_FORMATS
 
 app = FastAPI(
     title="Feiertage API",
@@ -28,6 +31,8 @@ app = FastAPI(
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+FORMAT_DESCRIPTION = f"Output format: {', '.join(AVAILABLE_FORMATS)}"
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -41,10 +46,11 @@ async def api_regions(
     year: int = Query(..., description="Year to query"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
     country: Optional[str] = Query(None, description="Filter by country: 'de' or 'at'"),
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all regions with their holidays for a given year."""
     regions = get_all_regions(year, inkl_sonntage, country)
-    return {
+    data = {
         "year": year,
         "count": len(regions),
         "regions": [
@@ -57,6 +63,8 @@ async def api_regions(
             for r in regions
         ],
     }
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)
 
 
 @app.get("/api/region/{region_name}")
@@ -64,18 +72,21 @@ async def api_region(
     region_name: str,
     year: int = Query(..., description="Year to query"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get holidays for a specific region."""
     r = get_region(region_name, year, inkl_sonntage)
     if r is None:
         raise HTTPException(status_code=404, detail=f"Region '{region_name}' not found")
-    return {
+    data = {
         "year": year,
         "region": r.name,
         "shortname": r.shortname,
         "count": len(r.feiertage),
         "feiertage": [f.to_dict() for f in r.feiertage],
     }
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)
 
 
 @app.get("/api/feiertage")
@@ -83,6 +94,7 @@ async def api_feiertage(
     year: int = Query(..., description="Year to query"),
     region: Optional[str] = Query(None, description="Region name"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all holidays for a year, optionally filtered by region."""
     if region:
@@ -96,16 +108,21 @@ async def api_feiertage(
         feiertage = r.feiertage
         region_name = "Alle"
 
-    return {
+    data = {
         "year": year,
         "region": region_name,
         "count": len(feiertage),
         "feiertage": [f.to_dict() for f in feiertage],
     }
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)
 
 
 @app.get("/api/feiertage/{datum}")
-async def api_feiertage_by_date(datum: str):
+async def api_feiertage_by_date(
+    datum: str,
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
+):
     """Get holidays for a specific date (YYYY-MM-DD)."""
     try:
         parts = datum.split("-")
@@ -114,16 +131,23 @@ async def api_feiertage_by_date(datum: str):
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
     result = get_feiertage_for_date(d)
-    return {
+    data = {
         "date": d.isoformat(),
         "count": len(result),
         "feiertage": [f.to_dict() for f in result],
     }
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)
 
 
 @app.get("/api/easter")
-async def api_easter(year: int = Query(..., description="Year to calculate Easter for")):
+async def api_easter(
+    year: int = Query(..., description="Year to calculate Easter for"),
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
+):
     """Get the date of Easter (Ostersonntag) for a given year."""
     from app.feiertage import ostern as calc_ostern
     o = calc_ostern(year)
-    return o.to_dict()
+    data = o.to_dict()
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)

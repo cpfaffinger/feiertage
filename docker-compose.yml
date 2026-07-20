@@ -1,9 +1,6 @@
 services:
   feiertage:
-    build:
-      context: .
-      args:
-        VERSION: "${VERSION:-unknown}"
+    build: .
     container_name: feiertage-api
     ports:
       - "${FEIERTAGE_WEB_PORT:-8000}:8000"

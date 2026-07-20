@@ -1,10 +1,10 @@
 FROM python:3.12-slim
 
-ARG VERSION=unknown
+ARG VERSION=1.2.0
 
 WORKDIR /app
 
-RUN echo "VERSION=$VERSION"
+RUN echo "VERSION=${VERSION}"
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

@@ -182,3 +182,63 @@ class TestApiEaster:
         assert "date" in data
         assert "name" in data
         assert data["name"] == "Ostern"
+
+
+class TestApiIsFeiertag:
+    def test_neujahr_no_region(self):
+        response = client.get("/api/isFeiertag?date=2026-01-01")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_feiertag"] is True
+        names = [f["name"] for f in data["feiertage"]]
+        assert "Neujahr" in names
+
+    def test_neujahr_with_region(self):
+        response = client.get("/api/isFeiertag?date=2026-01-01&region=Bayern")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_feiertag"] is True
+        assert len(data["feiertage"]) == 1
+        assert data["feiertage"][0]["name"] == "Neujahr"
+        assert data["feiertage"][0]["region"] == "Bayern"
+
+    def test_not_a_feiertag(self):
+        response = client.get("/api/isFeiertag?date=2026-07-03")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_feiertag"] is False
+        assert len(data["feiertage"]) == 0
+
+    def test_niederoesterreich_feiertag(self):
+        response = client.get("/api/isFeiertag?date=2026-11-15&region=Niederösterreich")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_feiertag"] is True
+        names = [f["name"] for f in data["feiertage"]]
+        assert "Leopolditag" in names
+
+    def test_invalid_region(self):
+        response = client.get("/api/isFeiertag?date=2026-01-01&region=InvalidRegion")
+        assert response.status_code == 200
+        data = response.json()
+        assert "error" in data
+
+    def test_invalid_date(self):
+        response = client.get("/api/isFeiertag?date=not-a-date")
+        assert response.status_code == 400
+
+    def test_with_sundays(self):
+        response = client.get("/api/isFeiertag?date=2026-04-05&region=Brandenburg&inkl_sonntage=true")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["is_feiertag"] is True
+
+    def test_format_xml(self):
+        response = client.get("/api/isFeiertag?date=2026-01-01&format=xml")
+        assert response.status_code == 200
+        assert "Neujahr" in response.text
+
+    def test_format_csv(self):
+        response = client.get("/api/isFeiertag?date=2026-01-01&format=csv")
+        assert response.status_code == 200
+        assert "Neujahr" in response.text

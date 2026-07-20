@@ -17,6 +17,7 @@ from app.region import (
     get_region,
     get_feiertage_for_date_in_region,
     get_feiertage_for_date,
+    is_feiertag,
 )
 from app.feiertage import Feiertag
 from app.formatter import format_response, AVAILABLE_FORMATS
@@ -149,5 +150,32 @@ async def api_easter(
     from app.feiertage import ostern as calc_ostern
     o = calc_ostern(year)
     data = o.to_dict()
+    body, content_type = format_response(data, fmt)
+    return Response(content=body, media_type=content_type)
+
+
+@app.get("/api/isFeiertag")
+async def api_is_feiertag(
+    datum: str = Query(..., alias="date", description="Date in YYYY-MM-DD format"),
+    region: Optional[str] = Query(None, description="Region name (optional, regions are unique across countries)"),
+    inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
+):
+    """Check whether a given date is a public holiday.
+
+    Can optionally filter by region. Regions are unique across Germany and Austria,
+    so the country parameter is not needed.
+
+    Examples:
+    - /api/isFeiertag?date=2026-04-06
+    - /api/isFeiertag?date=2026-04-06&region=Niederösterreich
+    """
+    try:
+        parts = datum.split("-")
+        d = date(int(parts[0]), int(parts[1]), int(parts[2]))
+    except (ValueError, IndexError):
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    data = is_feiertag(d, region, inkl_sonntage)
     body, content_type = format_response(data, fmt)
     return Response(content=body, media_type=content_type)

@@ -400,3 +400,39 @@ def get_feiertage_for_date(d: date) -> list:
         if f.datum == d:
             result.append(f)
     return result
+
+
+def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -> dict:
+    """Check whether a date is a holiday, optionally filtered by region.
+
+    Returns a dict with keys: date, is_feiertag, feiertage (list of {name, region}).
+    If region_name is given, feiertage are specific to that region.
+    Otherwise checks all regions.
+    """
+    if region_name:
+        r = get_region(region_name, d.year, inkl_sonntage)
+        if r is None:
+            return {"date": d.isoformat(), "is_feiertag": False, "feiertage": [], "error": f"Region '{region_name}' not found"}
+        matching = [f for f in r.feiertage if f.datum == d]
+        return {
+            "date": d.isoformat(),
+            "is_feiertag": len(matching) > 0,
+            "feiertage": [{"name": f.name, "region": r.name, "region_short": r.shortname} for f in matching],
+        }
+
+    all_regions = get_all_regions(d.year, inkl_sonntage)
+    results = []
+    for reg in all_regions:
+        for f in reg.feiertage:
+            if f.datum == d and f.name not in [x["name"] for x in results]:
+                results.append({
+                    "name": f.name,
+                    "region": reg.name,
+                    "region_short": reg.shortname,
+                })
+
+    return {
+        "date": d.isoformat(),
+        "is_feiertag": len(results) > 0,
+        "feiertage": results,
+    }

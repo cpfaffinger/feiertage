@@ -184,10 +184,15 @@
     </div>
 
     <footer>
-        Feiertage API v1.2.1 &mdash; Free &amp; Open &mdash; <a href="https://github.com/cpfaffinger/feiertage">GitHub</a>
+        Feiertage API <span id="version">v...</span> &mdash; Free &amp; Open &mdash; <a href="https://github.com/cpfaffinger/feiertage">GitHub</a>
     </footer>
 
     <script>
+        (function() {
+            fetch('/openapi.json').then(function(r) { return r.json(); }).then(function(d) {
+                document.getElementById('version').textContent = 'v' + d.info.version;
+            }).catch(function() { document.getElementById('version').textContent = ''; });
+        })();
         (function() {
             var endpoints = [
                 { route: '/api/regions?year=2026', hint: 'Alle Regionen & Feiertage' },

@@ -25,9 +25,13 @@ app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="1.3.0",
+    version="1.3.1",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    redoc_js_url="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js",
 )
 
 app.add_middleware(

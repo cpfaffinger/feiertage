@@ -7,7 +7,6 @@ No authentication required - completely open and public.
 
 Supported output formats: json, xml, csv, tsv, txt
 """
-import os
 from datetime import date
 from typing import Optional
 from fastapi import FastAPI, Query, HTTPException
@@ -22,19 +21,13 @@ from app.region import (
 )
 from app.formatter import format_response, AVAILABLE_FORMATS
 
-_root_path = os.environ.get("ROOT_PATH", "")
-
 app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="1.2.2",
+    version="1.3.0",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
-    root_path=_root_path,
-    openapi_url="/openapi.json" if not _root_path else f"{_root_path}/openapi.json",
-    docs_url="/docs" if not _root_path else f"{_root_path}/docs",
-    redoc_url="/redoc" if not _root_path else f"{_root_path}/redoc",
 )
 
 app.add_middleware(

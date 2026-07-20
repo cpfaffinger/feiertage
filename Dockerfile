@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-ARG VERSION=1.2.2
+ARG VERSION=1.3.0
 
 WORKDIR /app
 
@@ -14,6 +14,4 @@ COPY . .
 LABEL org.opencontainers.image.version="${VERSION}"
 EXPOSE 8000
 
-ENV ROOT_PATH=""
-
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*' ${ROOT_PATH:+--root-path $ROOT_PATH}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

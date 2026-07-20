@@ -416,11 +416,11 @@ def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -
 
     all_regions = get_all_regions(d.year, inkl_sonntage)
     results = []
-    seen = set()
     for reg in all_regions:
+        if reg.shortname == "All":
+            continue
         for f in reg.feiertage:
-            if f.datum == d and f.name not in seen:
-                seen.add(f.name)
+            if f.datum == d:
                 results.append({
                     "name": f.name,
                     "region": reg.name,

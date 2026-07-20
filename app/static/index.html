@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feiertage API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e; color: #e0e0e0; line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            padding: 60px 20px; text-align: center; border-bottom: 3px solid #e94560;
+        }
+        header h1 { font-size: 2.5em; color: #e94560; margin-bottom: 10px; }
+        header p { font-size: 1.2em; color: #aaa; }
+        .badge {
+            display: inline-block; background: #e94560; color: white; padding: 4px 12px;
+            border-radius: 12px; font-size: 0.85em; margin: 4px;
+        }
+        .card {
+            background: #16213e; border-radius: 8px; padding: 24px;
+            margin: 20px 0; border: 1px solid #0f3460;
+        }
+        .card h2 { color: #e94560; margin-bottom: 12px; }
+        .card h3 { color: #c0c0c0; margin: 16px 0 8px; }
+        .endpoint {
+            display: flex; align-items: center; padding: 10px; margin: 6px 0;
+            background: #1a1a2e; border-radius: 6px; border-left: 4px solid #e94560;
+        }
+        .method {
+            font-weight: bold; padding: 4px 10px; border-radius: 4px;
+            margin-right: 12px; font-size: 0.85em; min-width: 48px; text-align: center;
+        }
+        .method.get { background: #0d7377; color: #fff; }
+        .path { font-family: 'Consolas', monospace; flex: 1; word-break: break-all; }
+        .desc { color: #888; font-size: 0.9em; margin-left: 10px; }
+        code {
+            background: #0d0d1a; padding: 2px 6px; border-radius: 3px;
+            font-family: 'Consolas', monospace; color: #e94560;
+        }
+        pre {
+            background: #0d0d1a; padding: 16px; border-radius: 6px;
+            overflow-x: auto; font-family: 'Consolas', monospace; font-size: 0.9em;
+            margin: 8px 0;
+        }
+        .result {
+            background: #0d0d1a; padding: 16px; border-radius: 6px;
+            overflow-x: auto; margin: 8px 0; white-space: pre-wrap;
+            font-family: 'Consolas', monospace; font-size: 0.85em;
+            max-height: 300px; overflow-y: auto;
+        }
+        button {
+            background: #e94560; color: white; border: none; padding: 8px 18px;
+            border-radius: 6px; cursor: pointer; font-size: 0.95em; margin: 6px 4px;
+        }
+        button:hover { background: #c73a55; }
+        input, select {
+            background: #0d0d1a; color: #e0e0e0; border: 1px solid #0f3460;
+            padding: 8px 12px; border-radius: 4px; font-size: 0.95em; margin: 4px;
+        }
+        select { min-width: 200px; }
+        footer { text-align: center; padding: 30px; color: #666; font-size: 0.9em; }
+        .try-it { margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Feiertage API</h1>
+        <p>Gesetzliche Feiertage in Deutschland und Osterreich</p>
+        <p style="margin-top:10px">
+            <span class="badge">Public API</span>
+            <span class="badge">No Auth</span>
+            <span class="badge">DE + AT</span>
+        </p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>About</h2>
+            <p>This API provides all public holidays (<em>gesetzliche Feiertage</em>) for all 16 German federal states (Bundeslander) and all 9 Austrian states, plus special days like Easter, Advent Sundays, Thanksgiving, and more.</p>
+            <p style="margin-top:10px">The API is <strong>completely open</strong> - no authentication, no API keys, no rate limits. Just use it.</p>
+        </div>
+
+        <div class="card">
+            <h2>API Endpoints</h2>
+
+            <h3>All Regions</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/regions?year=2026</code></span>
+            </div>
+            <p class="desc">Returns all regions with their complete holiday lists for a year.</p>
+            <p class="desc">Optional: <code>?country=de</code> or <code>?country=at</code> to filter.</p>
+            <p class="desc">Optional: <code>?inkl_sonntage=true</code> to include Sundays.</p>
+
+            <h3>Single Region</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/region/Bayern?year=2026</code></span>
+            </div>
+            <p class="desc">Returns holidays for a specific region. Use region name (e.g. "Bayern", "Berlin", "Wien").</p>
+
+            <h3>Holidays for a Year</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/feiertage?year=2026&region=Bayern</code></span>
+            </div>
+            <p class="desc">Flat list of holidays. <code>region</code> parameter is optional.</p>
+
+            <h3>Holidays by Date</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/feiertage/2026-12-25</code></span>
+            </div>
+            <p class="desc">Check which holidays occur on a specific date.</p>
+
+            <h3>Easter Calculation</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/easter?year=2026</code></span>
+            </div>
+            <p class="desc">Get the Easter date for any year (Gauss algorithm).</p>
+        </div>
+
+        <div class="card">
+            <h2>Available Regions</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <h3>Germany</h3>
+                    <p>Baden-Württemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thüringen, Deutschland</p>
+                </div>
+                <div>
+                    <h3>Austria</h3>
+                    <p>Burgenland, Kärnten, Niederösterreich, Oberösterreich, Salzburg, Steiermark, Tirol, Vorarlberg, Wien, Österreich</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Try it</h2>
+            <select id="region-select">
+                <option value="">-- Select region --</option>
+            </select>
+            <input type="number" id="year-input" value="2026" min="1900" max="2100" style="width:80px">
+            <label><input type="checkbox" id="sunday-check"> Include Sundays</label>
+            <button onclick="tryApi()">Query</button>
+            <div class="result" id="result-box">Click "Query" to see results...</div>
+        </div>
+
+        <div class="card">
+            <h2>Swagger / OpenAPI</h2>
+            <p>Interactive API documentation available at:</p>
+            <a href="/docs" style="color:#e94560"><code>/docs</code></a>
+            <span style="margin:0 8px;color:#888">|</span>
+            <a href="/redoc" style="color:#e94560"><code>/redoc</code></a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Feiertage API - Free & Open - Based on <a href="https://github.com/wlbr/feiertage" style="color:#e94560">wlbr/feiertage</a> (Go)</p>
+    </footer>
+
+    <script>
+        const regions = [
+            "Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
+            "Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen",
+            "Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein",
+            "Thüringen","Deutschland","Burgenland","Kärnten","Niederösterreich",
+            "Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
+            "Österreich","Alle"
+        ];
+        const sel = document.getElementById('region-select');
+        regions.forEach(r => {
+            const o = document.createElement('option'); o.value = r; o.textContent = r;
+            sel.appendChild(o);
+        });
+
+        async function tryApi() {
+            const region = sel.value;
+            const year = document.getElementById('year-input').value;
+            const sunday = document.getElementById('sunday-check').checked;
+            const box = document.getElementById('result-box');
+
+            let url;
+            if (region) {
+                url = `/api/region/${encodeURIComponent(region)}?year=${year}&inkl_sonntage=${sunday}`;
+            } else {
+                url = `/api/regions?year=${year}&inkl_sonntage=${sunday}`;
+            }
+
+            box.textContent = 'Loading...';
+            try {
+                const r = await fetch(url);
+                const data = await r.json();
+                box.textContent = JSON.stringify(data, null, 2);
+            } catch(e) {
+                box.textContent = 'Error: ' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>

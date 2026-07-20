@@ -1,180 +1,120 @@
-# Feiertage
-Feiertage is a Go/Golang library for calculating German and Austrian bank holidays. It includes the calculation of the date of Easter and, more importantly, offers ways to retrieve public holidays for a state of Germany or Austria (=Bundesland).
+# Feiertage API
 
-The library is probably useful only for people realizing use cases with special requirements inside of Austria or Germany, such as shift schedules or capacity calculation.
+Gesetzliche Feiertage in Deutschland und Österreich als öffentliche REST API — komplett in Python mit FastAPI, OpenAPI/Swagger und Docker.
 
-### Documentation
-See https://pkg.go.dev/github.com/wlbr/feiertage
+Basierend auf dem Go-Projekt [wlbr/feiertage](https://github.com/wlbr/feiertage) mit identischem Verhalten.
 
-### Usage:
-There are two types of functions:
+## Features
 
-  * `<feiertag>(year)` and
-  * `<region>(year optional:IncludingSundays:true)`
+- Alle gesetzlichen Feiertage aller 16 deutschen und 9 österreichischen Bundesländer
+- Bewegliche Feiertage per Gauß-Osterformel (Ostern, Karfreitag, Pfingsten, etc.)
+- Spezielle Tage (Advent, Thanksgiving, Sommer-/Winterzeit, etc.)
+- **Public API** — keine Authentifizierung, kein API-Key, keine Limits
+- **Swagger UI** (`/docs`) und **ReDoc** (`/redoc`)
+- **Web-Frontend** mit Live-API-Testing
+- **100% Test Coverage** — 724 Tests, verifiziert gegen Go-Referenz
 
-`<feiertag>` returns an extended `time` object (type `feiertag`). It carries the date of the holiday
-in the requested year plus the name of the holiday. `<feiertag>` may be any of the following:
+## Quickstart (Docker)
 
-|||
-|----|-----|
-`Neujahr` | `Epiphanias`
-`HeiligeDreiKönige` | `Weltknuddeltag`
-`InternationalerTagDesGedenkensAnDieOpferDesHolocaust` | `Weiberfastnacht`
-`Valentinstag` | `Karnevalssonntag`
-`Rosenmontag` | `Fastnacht`
-`Aschermittwoch` | `InternationalerFrauentag`
-`Josefitag` | `Palmsonntag`
-`BeginnSommerzeit` | `Gründonnerstag`
-`Karfreitag` | `Ostern`
-`Ostermontag` | `TagDerErde`
-`Walpurgisnacht` | `Staatsfeiertag`
-`TagDerArbeit` | `InternationalerTagDerPressefreiheit`
-`StarWarsDay` | `Florianitag`
-`TagDerBefreiung` | `Muttertag`
-`Vatertag` | `ChristiHimmelfahrt`
-`Pfingsten` | `Handtuchtag`
-`Pfingstmontag` | `TowelDay`
-`Dreifaltigkeitssonntag` | `InternationalerKindertag`
-`Fronleichnam` | `Weltumwelttag`
-`TagDesMeeres` | `Weltspieltag`
-`Weltblutspendetag` | `Weltflüchtlingstag`
-`FêteDeLaMusique` | `InternationalerTagGegenDrogenmissbrauch`
-`SystemAdministratorAppreciationDay` | `MariäHimmelfahrt`
-`Antikriegstag` | `Weltkindertag`
-`HobbitDay` | `Rupertitag`
-`TagDerDeutschenEinheit` | `Erntedankfest`
-`TagDerVolksabstimmung` | `BeginnWinterzeit`
-`Nationalfeiertag` | `Halloween`
-`Reformationstag` | `Allerheiligen`
-`Allerseelen` | `Weltmännertag`
-`Martinstag` | `Karnevalsbeginn`
-`Volkstrauertag` | `Leopolditag`
-`BußUndBettag` | `InternationalerMännertag`
-`Totensontag` | `Thanksgiving`
-`Blackfriday` | `ErsterAdvent`
-`Nikolaus` | `ZweiterAdvent`
-`MariäEmpfängnis` | `MariäUnbefleckteEmpfängnis`
-`DritterAdvent` | `VierterAdvent`
-`Heiligabend` | `Christtag`
-`Weihnachten` | `Stefanitag`
-`ZweiterWeihnachtsfeiertag` | `Silvester`
+```bash
+# Port in .env konfigurieren (default: 8000)
+echo "FEIERTAGE_WEB_PORT=8000" > .env
 
-`<region>` returns an object of type `region`. It offers a list of public holidays valid in the specified state as well as the name and the shortname of the state as attributes.
-`<region>` may be any of:
+# Starten
+docker compose up -d
 
-||||
-----|-----|----
-`BadenWürttemberg` | `Bayern` | `Berlin`
-`Brandenburg` | `Bremen` | `Hamburg`
-`Hessen` | `MecklenburgVorpommern` | `Niedersachsen`
-`NordrheinWestfalen` | `RheinlandPfalz` | `Saarland`
-`Sachsen` | `SachsenAnhalt` | `SchleswigHolstein`
-`Thüringen` | `Deutschland` | `Burgenland`
-`Kärnten` | `Niederösterreich` | `Oberösterreich`
-`Salzburg` | `Steiermark` | `Tirol`
-`Vorarlberg` | `Wien` | `Österreich`
-`All` | &nbsp; | &nbsp;
+# API testen
+curl http://localhost:8000/api/region/Bayern?year=2026
+curl http://localhost:8000/api/easter?year=2026
+```
 
-The optional region function argument `includingSundays` switches the behavior of the region function to include "gesetzliche Feiertage" that fall on Sundays in its output. This is important in Brandenburg, particularly for Easter and Pentecost Sunday. If you are calculating shift costs you will need to know even the holidays "hidden by Sunday".
+## Quickstart (Lokal)
 
-The region functions return the public holidays ("gesetzliche Feiertage"). The function `all` returns all defined "special dates", such as Penance Day (Buß- und Bettag) or the begin/end of daylight saving time.
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
 
-The regional functions for Austrian Bundesländer include saints' days which are state-level holidays, meaning
-schools etc. are generally closed but workers don't get the day off by default. If you don't want to
-include these days in your planning, it's okay to reference `Österreich` instead, as legal holidays are
-(more or less) synchronised across all Austrian states (Bundesländer).
+## API Endpunkte
 
-### Examples:
+| Methode | Pfad | Beschreibung |
+|---------|------|-------------|
+| `GET` | `/` | Web-Frontend mit API-Dokumentation |
+| `GET` | `/docs` | Swagger UI (interaktiv) |
+| `GET` | `/redoc` | ReDoc |
+| `GET` | `/openapi.json` | OpenAPI Schema |
+| `GET` | `/api/regions?year=2026` | Alle Regionen mit Feiertagen |
+| `GET` | `/api/regions?year=2026&country=de` | Nur DE-Regionen |
+| `GET` | `/api/regions?year=2026&inkl_sonntage=true` | Inklusive Sonntage |
+| `GET` | `/api/region/Bayern?year=2026` | Feiertage einer Region |
+| `GET` | `/api/feiertage?year=2026` | Alle Feiertage eines Jahres |
+| `GET` | `/api/feiertage?year=2026&region=Berlin` | Nach Region gefiltert |
+| `GET` | `/api/feiertage/2026-12-25` | Feiertage an einem Datum |
+| `GET` | `/api/easter?year=2026` | Osterdatum (Gauß) |
 
-    fmt.Println(Ostern(2016))
-    --> 27.03.2016 Ostern
+## Regionen
 
+### Deutschland (16 Bundesländer + Deutschland)
+Baden-Württemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thüringen, Deutschland
 
-    fmt.Println(BußUndBettag(2016))
-    --> 16.11.2016 Buß- und Bettag
+### Österreich (9 Bundesländer + Österreich)
+Burgenland, Kärnten, Niederösterreich, Oberösterreich, Salzburg, Steiermark, Tirol, Vorarlberg, Wien, Österreich
 
+### Alle
+Der Spezialwert `Alle` enthält alle bekannten Feiertage inklusive spezieller Tage.
 
+## Tests
 
-    fmt.Println(Brandenburg(2016))
-    --> Brandenburg (BB)
-        01.01.2016 Neujahr
-        25.03.2016 Karfreitag
-        27.03.2016 Ostern
-        28.03.2016 Ostermontag
-        01.05.2016 Tag der Arbeit
-        05.05.2016 Christi Himmelfahrt
-        15.05.2016 Pfingsten
-        16.05.2016 Pfingstmontag
-        03.10.2016 Tag der deutschen Einheit
-        31.10.2016 Reformationstag
-        25.12.2016 Weihnachten
-        26.12.2016 Zweiter Weihnachtsfeiertag
+```bash
+# Lokal
+pytest tests/ -v --cov=app --cov-report=term-missing
 
+# Im Docker Container
+docker compose exec feiertage python -m pytest tests/ -v --cov=app
+```
 
-    fmt.Println(Brandenburg(2016, false))
-    --> Brandenburg (BB)
-        01.01.2016 Neujahr
-        25.03.2016 Karfreitag
-        28.03.2016 Ostermontag
-        01.05.2016 Tag der Arbeit
-        05.05.2016 Christi Himmelfahrt
-        16.05.2016 Pfingstmontag
-        03.10.2016 Tag der deutschen Einheit
-        31.10.2016 Reformationstag
-        25.12.2016 Weihnachten
-        26.12.2016 Zweiter Weihnachtsfeiertag
+**Ergebnis:** 724 Tests, 100% Coverage — alle Werte gegen die Go-Referenzimplementierung verifiziert.
 
+## Konfiguration
 
-## Command line tool
+Die `.env`-Datei im Projekt-Root wird von Docker Compose gelesen:
 
-A little command line tool is included as well. It can be compiled using `make buildcmd` or `go build cmd/feiertage/feiertage.go` This will create an executable `feiertage`.
+```env
+FEIERTAGE_WEB_PORT=8000
+```
 
-See https://github.com/wlbr/feiertage/releases/latest for downloads.
+## Projektstruktur
 
-### Synopsis
+```
+feiertage/
+├── Dockerfile
+├── docker-compose.yml
+├── .env
+├── requirements.txt
+├── pyproject.toml
+├── .gitlab-ci.yml
+├── app/
+│   ├── feiertage.py          # 60+ Feiertagsfunktionen
+│   ├── region.py             # Region-Logik (DE + AT)
+│   ├── main.py               # FastAPI App
+│   └── static/
+│       └── index.html        # Web-Frontend
+└── tests/
+    ├── test_feiertage.py     # Feiertags-Berechnungen
+    ├── test_region.py        # Region-Logik
+    ├── test_api.py           # API-Endpunkte
+    └── test_go_comparison.py # Go vs. Python Vergleich
+```
 
-`feiertage: [options] year`<br>
-<dl>
-<dt>-asTaskjugglerCode (default false)</dt>
-<dd>Print the result as valid source code (`leave x y`) for the <a href="http://www.taskjuggler.org/">Taskjuggler</a> planning tool.
-<dt>-inklusiveSonntage (default false)</dt>
-<dd>Should public holidays on a Sunday be included?</dd>
-<dt>-region &lt;regionstring&gt; (default "All")</dt>
-<dd>Return public holidays for region `<regionstring>`.<br>
-<dd>&lt;regionstring&gt; may be (case insensitive, plus some other tricks to make it more tolerant):<br>
-&nbsp;BadenWürttemberg<br>
-&nbsp;Bayern<br>
-&nbsp;Berlin<br>
-&nbsp;Brandenburg<br>
-&nbsp;Bremen<br>
-&nbsp;Hamburg<br>
-&nbsp;Hessen<br>
-&nbsp;MecklenburgVorpommern<br>
-&nbsp;Niedersachsen<br>
-&nbsp;NordrheinWestfalen<br>
-&nbsp;RheinlandPfalz<br>
-&nbsp;Saarland<br>
-&nbsp;Sachsen<br>
-&nbsp;SachsenAnhalt<br>
-&nbsp;SchleswigHolstein<br>
-&nbsp;Thüringen<br>
-&nbsp;Deutschland<br>
-&nbsp;Burgenland<br>
-&nbsp;Kärnten<br>
-&nbsp;Niederösterreich<br>
-&nbsp;Oberösterreich<br>
-&nbsp;Salzburg<br>
-&nbsp;Steiermark<br>
-&nbsp;Tirol<br>
-&nbsp;Vorarlberg<br>
-&nbsp;Wien<br>
-&nbsp;Österreich<br>
-&nbsp;All</dd>
-</dl>
+## Vergleich mit Go-Implementierung
 
+Alle Berechnungen wurden gegen die Go-Referenzimplementierung `wlbr/feiertage` verifiziert:
 
-## Code
-* Documentation: [![Go Reference](https://pkg.go.dev/badge/github.com/wlbr/feiertage.svg)](https://pkg.go.dev/github.com/wlbr/feiertage)
-* Continuous Integration: [![CI](https://github.com/wlbr/feiertage/actions/workflows/ci.yml/badge.svg)](https://github.com/wlbr/feiertage/actions/workflows/ci.yml)
-* Test Coverage: [![codecov](https://codecov.io/gh/wlbr/feiertage/branch/main/graph/badge.svg)](https://codecov.io/gh/wlbr/feiertage)
-* Metrics: [![GoReportCard](https://goreportcard.com/badge/github.com/wlbr/feiertage)](https://goreportcard.com/report/github.com/wlbr/feiertage)
+- **Ostern**: Gauß-Osterformel (erweiterter Algorithmus), getestet für 1954, 1981, 2015, 2016
+- **Buß- und Bettag**, **Thanksgiving**, **Advent**, **Muttertag**: Daten identisch zu Go-Tests
+- **Feiertagszahlen pro Bundesland**: Alle 37 parametrisierten Testfälle aus `region_test.go` reproduziert
+- **Spezialfälle**: Reformationstag 2017, Frauentag Berlin ab 2019, Tag der Befreiung Berlin 2020 etc.
+
+## Lizenz
+
+MIT — siehe Go-Originalprojekt [wlbr/feiertage](https://github.com/wlbr/feiertage)

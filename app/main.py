@@ -9,6 +9,7 @@ Supported output formats: json, xml, csv, tsv, txt
 """
 from datetime import date
 from typing import Optional
+import httpx
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
@@ -21,17 +22,20 @@ from app.region import (
 )
 from app.formatter import format_response, AVAILABLE_FORMATS
 
+_REDOC_JS_URL = "https://cdn.jsdelivr.net/npm/redoc@2.2.0/bundles/redoc.standalone.js"
+_redoc_js_cache: Optional[str] = None
+
 app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="1.3.1",
+    version="1.3.2",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    redoc_js_url="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js",
+    redoc_js_url="/redoc.js",
 )
 
 app.add_middleware(
@@ -45,6 +49,18 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 FORMAT_DESCRIPTION = f"Output format: {', '.join(AVAILABLE_FORMATS)}"
+
+
+@app.get("/redoc.js")
+async def redoc_js():
+    """Proxy Redoc JS with correct MIME type to avoid browser blocking."""
+    global _redoc_js_cache
+    if _redoc_js_cache is None:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(_REDOC_JS_URL, timeout=30)
+            resp.raise_for_status()
+            _redoc_js_cache = resp.text
+    return Response(content=_redoc_js_cache, media_type="application/javascript")
 
 
 @app.get("/", response_class=HTMLResponse)

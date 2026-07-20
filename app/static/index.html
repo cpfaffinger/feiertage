@@ -7,87 +7,140 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e; color: #e0e0e0; line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0b0f19; color: #c8d6e5; line-height: 1.7;
+            min-height: 100vh;
         }
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+            pointer-events: none; z-index: 0;
+        }
+        .container { max-width: 920px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
         header {
-            background: linear-gradient(135deg, #0f3460, #16213e);
-            padding: 60px 20px; text-align: center; border-bottom: 3px solid #e94560;
+            position: relative; text-align: center; padding: 80px 24px 60px;
+            overflow: hidden;
         }
-        header h1 { font-size: 2.5em; color: #e94560; margin-bottom: 10px; }
-        header p { font-size: 1.2em; color: #aaa; }
+        header::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.04) 50%, transparent 100%);
+        }
+        header::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 400px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(129, 140, 248, 0.4), transparent);
+        }
+        header h1 {
+            position: relative; font-size: 2.8em; font-weight: 700;
+            background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 50%, #e0e7ff 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 8px; letter-spacing: -0.02em;
+        }
+        header p { position: relative; font-size: 1.15em; color: #94a3b8; }
+        .badges { position: relative; margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
         .badge {
-            display: inline-block; background: #e94560; color: white; padding: 4px 12px;
-            border-radius: 12px; font-size: 0.85em; margin: 4px;
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 14px; border-radius: 20px; font-size: 0.82em; font-weight: 500;
+            background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #a5b4fc; letter-spacing: 0.01em;
+            backdrop-filter: blur(8px);
         }
         .card {
-            background: #16213e; border-radius: 8px; padding: 24px;
-            margin: 20px 0; border: 1px solid #0f3460;
+            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(129, 140, 248, 0.1);
+            border-radius: 14px; padding: 28px; margin: 18px 0;
+            backdrop-filter: blur(12px); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-        .card h2 { color: #e94560; margin-bottom: 12px; }
-        .card h3 { color: #c0c0c0; margin: 16px 0 8px; }
+        .card:hover { border-color: rgba(129, 140, 248, 0.2); box-shadow: 0 4px 32px rgba(99, 102, 241, 0.06); }
+        .card h2 {
+            font-size: 1.25em; font-weight: 600; color: #c4b5fd; margin-bottom: 14px;
+            letter-spacing: -0.01em;
+        }
+        .card h3 { color: #94a3b8; margin: 20px 0 8px; font-size: 0.95em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
         .endpoint {
-            display: flex; align-items: center; padding: 10px; margin: 6px 0;
-            background: #1a1a2e; border-radius: 6px; border-left: 4px solid #e94560;
+            display: flex; align-items: center; padding: 11px 14px; margin: 5px 0;
+            background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(129, 140, 248, 0.08);
+            border-radius: 8px; border-left: 3px solid rgba(129, 140, 248, 0.4);
+            transition: border-left-color 0.2s, background 0.2s;
         }
+        .endpoint:hover { border-left-color: #818cf8; background: rgba(99, 102, 241, 0.06); }
         .method {
-            font-weight: bold; padding: 4px 10px; border-radius: 4px;
-            margin-right: 12px; font-size: 0.85em; min-width: 48px; text-align: center;
+            font-weight: 600; padding: 3px 10px; border-radius: 5px;
+            margin-right: 12px; font-size: 0.78em; min-width: 44px; text-align: center;
+            letter-spacing: 0.02em;
         }
-        .method.get { background: #0d7377; color: #fff; }
-        .path { font-family: 'Consolas', monospace; flex: 1; word-break: break-all; }
-        .desc { color: #888; font-size: 0.9em; margin-left: 10px; }
+        .method.get { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .path { font-family: 'JetBrains Mono', 'Consolas', monospace; flex: 1; word-break: break-all; font-size: 0.92em; }
+        .desc { color: #64748b; font-size: 0.88em; margin: 4px 0 2px 28px; }
         code {
-            background: #0d0d1a; padding: 2px 6px; border-radius: 3px;
-            font-family: 'Consolas', monospace; color: #e94560;
-        }
-        pre {
-            background: #0d0d1a; padding: 16px; border-radius: 6px;
-            overflow-x: auto; font-family: 'Consolas', monospace; font-size: 0.9em;
-            margin: 8px 0;
+            background: rgba(99, 102, 241, 0.1); padding: 2px 7px; border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.9em;
+            color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.12);
         }
         .result {
-            background: #0d0d1a; padding: 16px; border-radius: 6px;
-            overflow-x: auto; margin: 8px 0; white-space: pre-wrap;
-            font-family: 'Consolas', monospace; font-size: 0.85em;
-            max-height: 300px; overflow-y: auto;
+            background: rgba(5, 8, 16, 0.7); padding: 18px; border-radius: 10px;
+            overflow-x: auto; margin: 12px 0 0; white-space: pre-wrap;
+            font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.82em;
+            max-height: 340px; overflow-y: auto; color: #94a3b8;
+            border: 1px solid rgba(129, 140, 248, 0.08);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         button {
-            background: #e94560; color: white; border: none; padding: 8px 18px;
-            border-radius: 6px; cursor: pointer; font-size: 0.95em; margin: 6px 4px;
+            background: rgba(99, 102, 241, 0.2); color: #c4b5fd;
+            border: 1px solid rgba(99, 102, 241, 0.3); padding: 9px 20px;
+            border-radius: 8px; cursor: pointer; font-size: 0.93em; font-weight: 500;
+            margin: 6px 4px; transition: all 0.25s; position: relative; overflow: hidden;
         }
-        button:hover { background: #c73a55; }
+        button::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.2), transparent 70%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        button:hover { background: rgba(99, 102, 241, 0.3); border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 20px rgba(99, 102, 241, 0.15); }
+        button:hover::after { opacity: 1; }
         input, select {
-            background: #0d0d1a; color: #e0e0e0; border: 1px solid #0f3460;
-            padding: 8px 12px; border-radius: 4px; font-size: 0.95em; margin: 4px;
+            background: rgba(15, 23, 42, 0.6); color: #c8d6e5;
+            border: 1px solid rgba(129, 140, 248, 0.15); padding: 9px 14px;
+            border-radius: 8px; font-size: 0.93em; margin: 4px;
+            transition: border-color 0.25s, box-shadow 0.25s; outline: none;
         }
-        select { min-width: 200px; }
-        footer { text-align: center; padding: 30px; color: #666; font-size: 0.9em; }
-        .try-it { margin-top: 12px; }
+        input:focus, select:focus { border-color: rgba(129, 140, 248, 0.5); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        select { min-width: 200px; cursor: pointer; }
+        select option { background: #0f172a; color: #c8d6e5; }
+        label { color: #94a3b8; font-size: 0.9em; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+        input[type="checkbox"] { accent-color: #818cf8; width: 15px; height: 15px; cursor: pointer; }
+        footer {
+            text-align: center; padding: 36px; color: #475569; font-size: 0.88em; position: relative;
+        }
+        footer a { color: #818cf8; text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: #a5b4fc; }
+        a { color: #818cf8; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #a5b4fc; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <header>
         <h1>Feiertage API</h1>
-        <p>Gesetzliche Feiertage in Deutschland und Osterreich</p>
-        <p style="margin-top:10px">
+        <p>Gesetzliche Feiertage in Deutschland &amp; Osterreich</p>
+        <div class="badges">
             <span class="badge">Public API</span>
             <span class="badge">No Auth</span>
             <span class="badge">DE + AT</span>
-        </p>
+        </div>
     </header>
 
     <div class="container">
         <div class="card">
             <h2>About</h2>
             <p>This API provides all public holidays (<em>gesetzliche Feiertage</em>) for all 16 German federal states (Bundeslander) and all 9 Austrian states, plus special days like Easter, Advent Sundays, Thanksgiving, and more.</p>
-            <p style="margin-top:10px">The API is <strong>completely open</strong> - no authentication, no API keys, no rate limits. Just use it.</p>
+            <p style="margin-top:12px">The API is <strong>completely open</strong> &mdash; no authentication, no API keys, no rate limits. Just use it.</p>
         </div>
 
         <div class="card">
             <h2>API Endpoints</h2>
-
             <h3>All Regions</h3>
             <div class="endpoint">
                 <span class="method get">GET</span>
@@ -96,6 +149,7 @@
             <p class="desc">Returns all regions with their complete holiday lists for a year.</p>
             <p class="desc">Optional: <code>?country=de</code> or <code>?country=at</code> to filter.</p>
             <p class="desc">Optional: <code>?inkl_sonntage=true</code> to include Sundays.</p>
+            <p class="desc">Output formats: <code>?format=xml|csv|tsv|txt</code></p>
 
             <h3>Single Region</h3>
             <div class="endpoint">
@@ -104,10 +158,17 @@
             </div>
             <p class="desc">Returns holidays for a specific region. Use region name (e.g. "Bayern", "Berlin", "Wien").</p>
 
+            <h3>Is Holiday?</h3>
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="path"><code>/api/isFeiertag?date=2026-11-15&amp;region=Niederosterreich</code></span>
+            </div>
+            <p class="desc">Check if a date is a holiday, optionally filtered by region.</p>
+
             <h3>Holidays for a Year</h3>
             <div class="endpoint">
                 <span class="method get">GET</span>
-                <span class="path"><code>/api/feiertage?year=2026&region=Bayern</code></span>
+                <span class="path"><code>/api/feiertage?year=2026&amp;region=Bayern</code></span>
             </div>
             <p class="desc">Flat list of holidays. <code>region</code> parameter is optional.</p>
 
@@ -128,14 +189,14 @@
 
         <div class="card">
             <h2>Available Regions</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="grid-2">
                 <div>
                     <h3>Germany</h3>
-                    <p>Baden-Württemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thüringen, Deutschland</p>
+                    <p>Baden-Wurttemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thuringen, Deutschland</p>
                 </div>
                 <div>
                     <h3>Austria</h3>
-                    <p>Burgenland, Kärnten, Niederösterreich, Oberösterreich, Salzburg, Steiermark, Tirol, Vorarlberg, Wien, Österreich</p>
+                    <p>Burgenland, Karnten, Niederosterreich, Oberosterreich, Salzburg, Steiermark, Tirol, Vorarlberg, Wien, Osterreich</p>
                 </div>
             </div>
         </div>
@@ -145,7 +206,7 @@
             <select id="region-select">
                 <option value="">-- Select region --</option>
             </select>
-            <input type="number" id="year-input" value="2026" min="1900" max="2100" style="width:80px">
+            <input type="number" id="year-input" value="2026" min="1900" max="2100" style="width:90px">
             <select id="format-select" style="min-width:80px">
                 <option value="json">JSON</option>
                 <option value="xml">XML</option>
@@ -160,25 +221,22 @@
 
         <div class="card">
             <h2>Swagger / OpenAPI</h2>
-            <p>Interactive API documentation available at:</p>
-            <a href="/docs" style="color:#e94560"><code>/docs</code></a>
-            <span style="margin:0 8px;color:#888">|</span>
-            <a href="/redoc" style="color:#e94560"><code>/redoc</code></a>
+            <p>Interactive API documentation available at &nbsp;<a href="/docs"><code>/docs</code></a><span style="margin:0 8px;color:#475569">&bull;</span><a href="/redoc"><code>/redoc</code></a></p>
         </div>
     </div>
 
     <footer>
-        <p>Feiertage API - Free & Open - Based on <a href="https://github.com/wlbr/feiertage" style="color:#e94560">wlbr/feiertage</a> (Go)</p>
+        <p>Feiertage API &mdash; Free &amp; Open &mdash; Based on <a href="https://github.com/wlbr/feiertage">wlbr/feiertage</a> (Go)</p>
     </footer>
 
     <script>
         const regions = [
-            "Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
+            "Baden-Wurttemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
             "Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen",
             "Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein",
-            "Thüringen","Deutschland","Burgenland","Kärnten","Niederösterreich",
-            "Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
-            "Österreich","Alle"
+            "Thuringen","Deutschland","Burgenland","Karnten","Niederosterreich",
+            "Oberosterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
+            "Osterreich","Alle"
         ];
         const sel = document.getElementById('region-select');
         regions.forEach(r => {
@@ -195,9 +253,9 @@
 
             let url;
             if (region) {
-                url = `/api/region/${encodeURIComponent(region)}?year=${year}&inkl_sonntage=${sunday}&format=${fmt}`;
+                url = '/api/region/' + encodeURIComponent(region) + '?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
             } else {
-                url = `/api/regions?year=${year}&inkl_sonntage=${sunday}&format=${fmt}`;
+                url = '/api/regions?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
             }
 
             box.textContent = 'Loading...';

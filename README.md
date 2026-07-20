@@ -55,6 +55,9 @@ Alle Endpunkte unterstützen den `?format=` Parameter: `json` (default), `xml`, 
 | `GET` | `/api/feiertage/2026-12-25` | Feiertage an einem Datum |
 | `GET` | `/api/easter?year=2026` | Osterdatum (Gauß) |
 
+> `year` ist optional und fällt auf das aktuelle Jahr zurück. Die JSON-Response-Schemas
+> aller Endpunkte sind in Swagger UI und ReDoc dokumentiert.
+
 ### Format-Beispiele
 
 ```bash

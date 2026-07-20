@@ -14,6 +14,7 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.docs import get_redoc_html
 from app.region import (
     get_all_regions,
     get_region,
@@ -21,6 +22,14 @@ from app.region import (
     is_feiertag,
 )
 from app.formatter import format_response, AVAILABLE_FORMATS
+from app.schemas import (
+    RegionsResponse,
+    RegionResponse,
+    DateFeiertageResponse,
+    EasterResponse,
+    IsFeiertagResponse,
+    HealthResponse,
+)
 
 _REDOC_JS_URL = "https://cdn.jsdelivr.net/npm/redoc@2.2.0/bundles/redoc.standalone.js"
 _redoc_js_cache: Optional[str] = None
@@ -34,14 +43,17 @@ app = FastAPI(
     license_info={"name": "MIT"},
     openapi_url="/openapi.json",
     docs_url="/docs",
-    redoc_url="/redoc",
-    redoc_js_url="/redoc.js",
+    # Default ReDoc route is disabled and replaced by a custom one below that
+    # serves the JS bundle from our self-hosted /redoc.js proxy. FastAPI's
+    # constructor has no redoc_js_url parameter (it is silently ignored via
+    # **extra), so the default route would always load from the CDN.
+    redoc_url=None,
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -51,7 +63,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 FORMAT_DESCRIPTION = f"Output format: {', '.join(AVAILABLE_FORMATS)}"
 
 
-@app.get("/redoc.js")
+@app.get("/redoc.js", include_in_schema=False)
 async def redoc_js():
     """Proxy Redoc JS with correct MIME type to avoid browser blocking."""
     global _redoc_js_cache
@@ -63,20 +75,32 @@ async def redoc_js():
     return Response(content=_redoc_js_cache, media_type="application/javascript")
 
 
+@app.get("/redoc", include_in_schema=False)
+async def redoc_html():
+    """Serve ReDoc using the self-hosted JS bundle instead of the CDN."""
+    return get_redoc_html(
+        openapi_url="/openapi.json",
+        title="Feiertage API - ReDoc",
+        redoc_js_url="/redoc.js",
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     with open("app/static/index.html", encoding="utf-8") as f:
         return f.read()
 
 
-@app.get("/api/regions")
+@app.get("/api/regions", response_model=RegionsResponse)
 async def api_regions(
-    year: int = Query(..., description="Year to query"),
+    year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
     country: Optional[str] = Query(None, description="Filter by country: 'de' or 'at'"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all regions with their holidays for a given year."""
+    if year is None:
+        year = date.today().year
     regions = get_all_regions(year, inkl_sonntage, country)
     data = {
         "year": year,
@@ -95,14 +119,16 @@ async def api_regions(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/region/{region_name}")
+@app.get("/api/region/{region_name}", response_model=RegionResponse)
 async def api_region(
     region_name: str,
-    year: int = Query(..., description="Year to query"),
+    year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get holidays for a specific region."""
+    if year is None:
+        year = date.today().year
     r = get_region(region_name, year, inkl_sonntage)
     if r is None:
         raise HTTPException(status_code=404, detail=f"Region '{region_name}' not found")
@@ -117,28 +143,28 @@ async def api_region(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/feiertage")
+@app.get("/api/feiertage", response_model=RegionResponse)
 async def api_feiertage(
-    year: int = Query(..., description="Year to query"),
+    year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
     region: Optional[str] = Query(None, description="Region name"),
     inkl_sonntage: bool = Query(False, description="Include Sundays"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all holidays for a year, optionally filtered by region."""
+    if year is None:
+        year = date.today().year
     if region:
         r = get_region(region, year, inkl_sonntage)
         if r is None:
             raise HTTPException(status_code=404, detail=f"Region '{region}' not found")
-        feiertage = r.feiertage
-        region_name = r.name
     else:
-        r = get_region("Alle", year, True)
-        feiertage = r.feiertage
-        region_name = "Alle"
+        r = get_region("Alle", year, inkl_sonntage)
+    feiertage = r.feiertage
 
     data = {
         "year": year,
-        "region": region_name,
+        "region": r.name,
+        "shortname": r.shortname,
         "count": len(feiertage),
         "feiertage": [f.to_dict() for f in feiertage],
     }
@@ -146,7 +172,7 @@ async def api_feiertage(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/feiertage/{datum}")
+@app.get("/api/feiertage/{datum}", response_model=DateFeiertageResponse)
 async def api_feiertage_by_date(
     datum: str,
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
@@ -168,12 +194,14 @@ async def api_feiertage_by_date(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/easter")
+@app.get("/api/easter", response_model=EasterResponse)
 async def api_easter(
-    year: int = Query(..., description="Year to calculate Easter for"),
+    year: Optional[int] = Query(None, description="Year to calculate Easter for (defaults to current year)"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get the date of Easter (Ostersonntag) for a given year."""
+    if year is None:
+        year = date.today().year
     from app.feiertage import ostern as calc_ostern
     o = calc_ostern(year)
     data = o.to_dict()
@@ -181,7 +209,7 @@ async def api_easter(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/isFeiertag")
+@app.get("/api/isFeiertag", response_model=IsFeiertagResponse)
 async def api_is_feiertag(
     datum: str = Query(..., alias="date", description="Date in YYYY-MM-DD format"),
     region: Optional[str] = Query(None, description="Region name (optional, regions are unique across countries)"),
@@ -208,7 +236,7 @@ async def api_is_feiertag(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/health")
+@app.get("/health", response_model=HealthResponse)
 async def health():
     """Health check endpoint."""
     return {"status": "ok"}

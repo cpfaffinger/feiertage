@@ -125,7 +125,7 @@
     <div class="hero">
         <div class="hero-icon">&#x1F386;</div>
         <h1><span>Feiertage</span> API</h1>
-        <p>Gesetzliche Feiertage in allen deutschen und osterreichischen Bundeslandern &mdash; offen, kostenlos, ohne Auth.</p>
+        <p>Gesetzliche Feiertage in allen deutschen und österreichischen Bundesländern &mdash; offen, kostenlos, ohne Auth.</p>
         <div class="tags">
             <span class="tag">Public API</span>
             <span class="tag">No Auth</span>
@@ -144,15 +144,15 @@
 
         <section>
             <div class="section-label">Regions</div>
-            <h2>Verfugbare Regionen</h2>
-            <p class="sub">16 deutsche und 9 osterreichische Bundeslander + Sonderregionen</p>
+            <h2>Verfügbare Regionen</h2>
+            <p class="sub">16 deutsche und 9 österreichische Bundesländer + Sonderregionen</p>
             <div class="grid" id="region-grid"></div>
         </section>
 
         <section>
             <div class="section-label">Try it</div>
             <h2>Live Testen</h2>
-            <p class="sub">Region und Jahr auswahlen, Format wahlen, Query klicken.</p>
+            <p class="sub">Region und Jahr auswählen, Format wählen, Query klicken.</p>
             <div class="try-area">
                 <select id="region-select">
                     <option value="">-- Alle Regionen --</option>
@@ -199,7 +199,7 @@
                 { route: '/api/region/{name}?year=2026', hint: 'Eine Region' },
                 { route: '/api/feiertage?year=2026', hint: 'Alle Feiertage eines Jahres' },
                 { route: '/api/feiertage/2026-12-25', hint: 'Feiertage an einem Datum' },
-                { route: '/api/isFeiertag?date=2026-11-15&region=Niederoesterreich', hint: 'Ist ein Datum ein Feiertag?' },
+                { route: '/api/isFeiertag?date=2026-11-15&region=Niederösterreich', hint: 'Ist ein Datum ein Feiertag?' },
                 { route: '/api/easter?year=2026', hint: 'Osterdatum (Gauss)' }
             ];
             var list = document.getElementById('endpoint-list');
@@ -215,7 +215,7 @@
 
         (function() {
             var regions = [
-                { n: 'Baden-Wurttemberg', s: 'BW', c: 12 },
+                { n: 'Baden-Württemberg', s: 'BW', c: 12 },
                 { n: 'Bayern', s: 'BY', c: 12 },
                 { n: 'Berlin', s: 'BE', c: 11 },
                 { n: 'Brandenburg', s: 'BB', c: 10 },
@@ -230,18 +230,18 @@
                 { n: 'Sachsen', s: 'SN', c: 11 },
                 { n: 'Sachsen-Anhalt', s: 'ST', c: 11 },
                 { n: 'Schleswig-Holstein', s: 'SH', c: 10 },
-                { n: 'Thuringen', s: 'TH', c: 10 },
+                { n: 'Thüringen', s: 'TH', c: 10 },
                 { n: 'Deutschland', s: 'DE', c: 9, hl: true },
                 { n: 'Burgenland', s: 'Bgld', c: 14 },
-                { n: 'Karnten', s: 'Ktn', c: 15 },
-                { n: 'Niederosterreich', s: 'NO', c: 14 },
-                { n: 'Oberosterreich', s: 'OO', c: 14 },
+                { n: 'Kärnten', s: 'Ktn', c: 15 },
+                { n: 'Niederösterreich', s: 'NÖ', c: 14 },
+                { n: 'Oberösterreich', s: 'OÖ', c: 14 },
                 { n: 'Salzburg', s: 'Sbg', c: 14 },
                 { n: 'Steiermark', s: 'Stmk', c: 14 },
                 { n: 'Tirol', s: 'T', c: 14 },
                 { n: 'Vorarlberg', s: 'Vbg', c: 14 },
                 { n: 'Wien', s: 'W', c: 14 },
-                { n: 'Osterreich', s: 'AT', c: 13, hl: true }
+                { n: 'Österreich', s: 'AT', c: 13, hl: true }
             ];
             var grid = document.getElementById('region-grid');
             regions.forEach(function(r) {
@@ -256,12 +256,12 @@
         })();
 
         var regions = [
-            "Baden-Wurttemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
+            "Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
             "Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen",
             "Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein",
-            "Thuringen","Deutschland","Burgenland","Karnten","Niederosterreich",
-            "Oberosterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
-            "Osterreich","Alle"
+            "Thüringen","Deutschland","Burgenland","Kärnten","Niederösterreich",
+            "Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
+            "Österreich","Alle"
         ];
         var sel = document.getElementById('region-select');
         regions.forEach(function(r) {

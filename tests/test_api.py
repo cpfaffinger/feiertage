@@ -1,7 +1,9 @@
 """Tests for the FastAPI application endpoints."""
+from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+import app.main as main_module
 
 
 client = TestClient(app)
@@ -30,6 +32,14 @@ class TestDocsEndpoints:
     def test_redoc(self):
         response = client.get("/redoc")
         assert response.status_code == 200
+
+    def test_redoc_uses_self_hosted_js(self):
+        # ReDoc must load the bundle from our /redoc.js proxy, not the CDN,
+        # otherwise the page stays blank in MIME-restricted environments.
+        response = client.get("/redoc")
+        assert response.status_code == 200
+        assert "/redoc.js" in response.text
+        assert "cdn.jsdelivr.net" not in response.text
 
     def test_openapi_json(self):
         response = client.get("/openapi.json")
@@ -115,7 +125,15 @@ class TestApiRegion:
 
 class TestApiFeiertage:
     def test_all_2016(self):
+        # Without inkl_sonntage the no-region path must NOT include Sundays.
         response = client.get("/api/feiertage?year=2016")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 69
+
+    def test_all_2016_inkl_sonntage(self):
+        # inkl_sonntage must be honoured on the no-region path.
+        response = client.get("/api/feiertage?year=2016&inkl_sonntage=true")
         assert response.status_code == 200
         data = response.json()
         assert data["count"] == 81
@@ -242,3 +260,96 @@ class TestApiIsFeiertag:
         response = client.get("/api/isFeiertag?date=2026-01-01&format=csv")
         assert response.status_code == 200
         assert "Neujahr" in response.text
+
+
+class TestYearDefaults:
+    """Year is optional and defaults to the current year."""
+
+    def test_regions_defaults_to_current_year(self):
+        response = client.get("/api/regions")
+        assert response.status_code == 200
+        assert response.json()["year"] == date.today().year
+
+    def test_region_defaults_to_current_year(self):
+        response = client.get("/api/region/Bayern")
+        assert response.status_code == 200
+        assert response.json()["year"] == date.today().year
+
+    def test_feiertage_defaults_to_current_year(self):
+        response = client.get("/api/feiertage")
+        assert response.status_code == 200
+        assert response.json()["year"] == date.today().year
+
+    def test_easter_defaults_to_current_year(self):
+        response = client.get("/api/easter")
+        assert response.status_code == 200
+        assert response.json()["date"].startswith(str(date.today().year))
+
+
+class TestUnifiedSchema:
+    """The /api/feiertage response carries the unified region envelope."""
+
+    def test_feiertage_includes_shortname(self):
+        response = client.get("/api/feiertage?year=2026&region=Bayern")
+        assert response.status_code == 200
+        data = response.json()
+        assert set(["year", "region", "shortname", "count", "feiertage"]).issubset(data.keys())
+        assert data["shortname"] == "BY"
+
+    def test_feiertage_no_region_has_shortname(self):
+        response = client.get("/api/feiertage?year=2026")
+        assert response.status_code == 200
+        assert "shortname" in response.json()
+
+    def test_openapi_exposes_response_schemas(self):
+        data = client.get("/openapi.json").json()
+        schemas = data["components"]["schemas"]
+        for name in ["RegionsResponse", "RegionResponse", "DateFeiertageResponse",
+                     "EasterResponse", "IsFeiertagResponse", "Feiertag"]:
+            assert name in schemas
+        ref = data["paths"]["/api/regions"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
+        assert ref.endswith("RegionsResponse")
+
+
+class TestHealth:
+    def test_health_ok(self):
+        response = client.get("/health")
+        assert response.status_code == 200
+        assert response.json()["status"] == "ok"
+
+
+class TestRedocJsProxy:
+    def test_redoc_js_fetches_and_caches(self, monkeypatch):
+        main_module._redoc_js_cache = None
+        calls = {"n": 0}
+
+        class FakeResp:
+            text = "/* fake redoc bundle */"
+
+            def raise_for_status(self):
+                return None
+
+        class FakeClient:
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                return False
+
+            async def get(self, url, timeout=None):
+                calls["n"] += 1
+                return FakeResp()
+
+        monkeypatch.setattr(main_module.httpx, "AsyncClient", FakeClient)
+
+        first = client.get("/redoc.js")
+        assert first.status_code == 200
+        assert "fake redoc bundle" in first.text
+        assert "javascript" in first.headers["content-type"]
+
+        # Second call is served from cache without another fetch.
+        second = client.get("/redoc.js")
+        assert second.status_code == 200
+        assert calls["n"] == 1
+
+        main_module._redoc_js_cache = None

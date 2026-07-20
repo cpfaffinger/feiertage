@@ -1,6 +1,6 @@
 from datetime import date
 from dataclasses import dataclass, field
-from typing import Callable, Optional
+from typing import Optional
 from app.feiertage import (
     Feiertag, neujahr, epiphanias, heilige_drei_koenige, internationaler_frauentag,
     josefitag, karfreitag, ostern, ostermontag, tag_der_arbeit, staatsfeiertag,
@@ -309,7 +309,6 @@ def all_holidays(year: int, inkl_sonntage: bool = False) -> Region:
 # ── Region lookup ──
 
 _ALL_REGIONS = {
-    # German
     "Baden-Württemberg": baden_wuerttemberg,
     "Bayern": bayern,
     "Berlin": berlin,
@@ -341,11 +340,6 @@ _ALL_REGIONS = {
     # All
     "Alle": all_holidays,
 }
-
-_SHORTNAME_MAP = {r(2020, False).shortname: r for r in _ALL_REGIONS.values()}
-_SHORTNAME_MAP["DE"] = deutschland
-_SHORTNAME_MAP["AT"] = oesterreich
-_SHORTNAME_MAP["All"] = all_holidays
 
 
 def _canonicalize(s: str) -> str:
@@ -422,9 +416,11 @@ def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -
 
     all_regions = get_all_regions(d.year, inkl_sonntage)
     results = []
+    seen = set()
     for reg in all_regions:
         for f in reg.feiertage:
-            if f.datum == d and f.name not in [x["name"] for x in results]:
+            if f.datum == d and f.name not in seen:
+                seen.add(f.name)
                 results.append({
                     "name": f.name,
                     "region": reg.name,

@@ -1,6 +1,7 @@
 """Output formatter supporting JSON, XML, CSV, TSV and TXT formats."""
 import csv
 import io
+import json
 import xml.dom.minidom
 from typing import Any
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -32,7 +33,6 @@ def _build_xml_element(parent: Element, key: str, value: Any) -> Element:
 
 
 def to_json(data: dict) -> str:
-    import json
     return json.dumps(data, ensure_ascii=False, indent=2, default=str)
 
 

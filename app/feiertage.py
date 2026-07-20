@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 from dataclasses import dataclass, field
-from typing import Callable, Optional
-import json
+from typing import Optional
 
 
 @dataclass
@@ -12,9 +11,6 @@ class Feiertag:
 
     def to_dict(self) -> dict:
         return {"date": self.datum.isoformat(), "name": self.name}
-
-
-_default_time_format = "%d.%m.%Y"
 
 
 def _go_weekday(d: date) -> int:
@@ -186,7 +182,6 @@ def fronleichnam(year: int) -> Feiertag:
 # ── Special calculated holidays ──
 
 def _last_sunday_of_month(year: int, month: int) -> date:
-    d = date(year, month, 1)
     last_day = date(year, month + 1, 1) - timedelta(days=1) if month < 12 else date(year, 12, 31)
     days_since_sunday = (last_day.weekday() + 1) % 7
     return last_day - timedelta(days=days_since_sunday)
@@ -194,15 +189,8 @@ def _last_sunday_of_month(year: int, month: int) -> date:
 
 def _first_sunday_of_month(year: int, month: int) -> date:
     d = date(year, month, 1)
-    days_until_sunday = (6 - d.weekday()) % 7
+    days_until_sunday = (7 - _go_weekday(d)) % 7
     return d + timedelta(days=days_until_sunday)
-
-
-def _nth_weekday_of_month(year: int, month: int, weekday: int, n: int) -> date:
-    first = date(year, month, 1)
-    first_wday = first.weekday()
-    days_until = (weekday - first_wday) % 7
-    return first + timedelta(days=days_until + 7 * (n - 1))
 
 
 def buss_und_bettag(year: int) -> Feiertag:
@@ -255,7 +243,7 @@ def system_administrator_appreciation_day(year: int) -> Feiertag:
     return Feiertag(datum=o + timedelta(days=-d), name="System Administrator Appreciation Day")
 
 
-def hobbit_day(year: int) -> Feiertag:
+def hobbit_day(year: int) -> Optional[Feiertag]:
     if year >= 1978:
         return Feiertag(datum=date(year, 9, 22), name="Hobbit Day")
     return None

@@ -15,11 +15,9 @@ from fastapi.staticfiles import StaticFiles
 from app.region import (
     get_all_regions,
     get_region,
-    get_feiertage_for_date_in_region,
     get_feiertage_for_date,
     is_feiertag,
 )
-from app.feiertage import Feiertag
 from app.formatter import format_response, AVAILABLE_FORMATS
 
 app = FastAPI(

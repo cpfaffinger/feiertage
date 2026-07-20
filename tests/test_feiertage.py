@@ -493,13 +493,3 @@ class TestAllHolidayFunctions:
             assert result.datum.year == year
             assert isinstance(result.datum, datetime.date)
             assert isinstance(result.name, str)
-
-
-class TestNthWeekdayOfMonth:
-    def test_nth_weekday(self):
-        from app.feiertage import _nth_weekday_of_month
-        result = _nth_weekday_of_month(2026, 11, 3, 4)
-        assert result.day == 26
-        assert result.month == 11
-        assert result.year == 2026
-        assert result.weekday() == 3

@@ -40,8 +40,11 @@ def to_xml(data: dict) -> str:
     root = Element("response")
     for key, value in data.items():
         _build_xml_element(root, key, value)
-    dom = xml.dom.minidom.parseString(tostring(root, encoding="unicode"))
-    return dom.toprettyxml(indent="  ")
+    raw = tostring(root, encoding="unicode")
+    dom = xml.dom.minidom.parseString(raw)
+    body = dom.toprettyxml(indent="  ")
+    body = body.replace('<?xml version="1.0" ?>', '<?xml version="1.0" encoding="UTF-8"?>')
+    return body
 
 
 def to_csv(data: dict) -> str:
@@ -121,11 +124,11 @@ def _flatten_for_tabular(data: dict) -> list:
 
 
 FORMATTERS = {
-    "json": ("application/json", to_json),
-    "xml": ("application/xml", to_xml),
-    "csv": ("text/csv", to_csv),
-    "tsv": ("text/tab-separated-values", to_tsv),
-    "txt": ("text/plain", to_txt),
+    "json": ("application/json; charset=utf-8", to_json),
+    "xml": ("application/xml; charset=utf-8", to_xml),
+    "csv": ("text/csv; charset=utf-8", to_csv),
+    "tsv": ("text/tab-separated-values; charset=utf-8", to_tsv),
+    "txt": ("text/plain; charset=utf-8", to_txt),
 }
 
 AVAILABLE_FORMATS = list(FORMATTERS.keys())

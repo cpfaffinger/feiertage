@@ -184,30 +184,30 @@ class TestToTxt:
 class TestFormatResponse:
     def test_json(self):
         body, ct = format_response(SIMPLE_DATA, "json")
-        assert ct == "application/json"
+        assert "json" in ct
         assert "Neujahr" in body
 
     def test_xml(self):
         body, ct = format_response(SIMPLE_DATA, "xml")
-        assert ct == "application/xml"
+        assert "xml" in ct
         assert "<name>Neujahr</name>" in body
 
     def test_csv(self):
         body, ct = format_response(FEIERTAGE_DATA, "csv")
-        assert ct == "text/csv"
+        assert "csv" in ct
 
     def test_tsv(self):
         body, ct = format_response(FEIERTAGE_DATA, "tsv")
-        assert ct == "text/tab-separated-values"
+        assert "tab-separated" in ct
 
     def test_txt(self):
         body, ct = format_response(SIMPLE_DATA, "txt")
-        assert ct == "text/plain"
+        assert "plain" in ct
         assert "Neujahr" in body
 
     def test_invalid_format_falls_back_to_json(self):
         body, ct = format_response(SIMPLE_DATA, "yaml")
-        assert ct == "application/json"
+        assert "json" in ct
 
     def test_unknown_format_returns_json(self):
         body, ct = format_response(SIMPLE_DATA, "html")

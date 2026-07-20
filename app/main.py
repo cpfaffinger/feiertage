@@ -7,7 +7,7 @@ No authentication required - completely open and public.
 
 Supported output formats: json, xml, csv, tsv, txt
 """
-from datetime import date
+from datetime import date as Date
 from typing import Optional
 import httpx
 from fastapi import FastAPI, Query, HTTPException
@@ -38,7 +38,7 @@ app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="1.3.2",
+    version="2.0.0",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
     openapi_url="/openapi.json",
@@ -94,14 +94,14 @@ async def root():
 @app.get("/api/regions", response_model=RegionsResponse)
 async def api_regions(
     year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
-    inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    include_sundays: bool = Query(False, alias="includeSundays", description="Include Sundays"),
     country: Optional[str] = Query(None, description="Filter by country: 'de' or 'at'"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all regions with their holidays for a given year."""
     if year is None:
-        year = date.today().year
-    regions = get_all_regions(year, inkl_sonntage, country)
+        year = Date.today().year
+    regions = get_all_regions(year, include_sundays, country)
     data = {
         "year": year,
         "count": len(regions),
@@ -119,19 +119,19 @@ async def api_regions(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/region/{region_name}", response_model=RegionResponse)
+@app.get("/api/region/{regionName}", response_model=RegionResponse)
 async def api_region(
-    region_name: str,
+    regionName: str,
     year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
-    inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    include_sundays: bool = Query(False, alias="includeSundays", description="Include Sundays"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get holidays for a specific region."""
     if year is None:
-        year = date.today().year
-    r = get_region(region_name, year, inkl_sonntage)
+        year = Date.today().year
+    r = get_region(regionName, year, include_sundays)
     if r is None:
-        raise HTTPException(status_code=404, detail=f"Region '{region_name}' not found")
+        raise HTTPException(status_code=404, detail=f"Region '{regionName}' not found")
     data = {
         "year": year,
         "region": r.name,
@@ -147,18 +147,18 @@ async def api_region(
 async def api_feiertage(
     year: Optional[int] = Query(None, description="Year to query (defaults to current year)"),
     region: Optional[str] = Query(None, description="Region name"),
-    inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    include_sundays: bool = Query(False, alias="includeSundays", description="Include Sundays"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get all holidays for a year, optionally filtered by region."""
     if year is None:
-        year = date.today().year
+        year = Date.today().year
     if region:
-        r = get_region(region, year, inkl_sonntage)
+        r = get_region(region, year, include_sundays)
         if r is None:
             raise HTTPException(status_code=404, detail=f"Region '{region}' not found")
     else:
-        r = get_region("Alle", year, inkl_sonntage)
+        r = get_region("Alle", year, include_sundays)
     feiertage = r.feiertage
 
     data = {
@@ -172,15 +172,15 @@ async def api_feiertage(
     return Response(content=body, media_type=content_type)
 
 
-@app.get("/api/feiertage/{datum}", response_model=DateFeiertageResponse)
+@app.get("/api/feiertage/{date}", response_model=DateFeiertageResponse)
 async def api_feiertage_by_date(
-    datum: str,
+    date: str,
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Get holidays for a specific date (YYYY-MM-DD)."""
     try:
-        parts = datum.split("-")
-        d = date(int(parts[0]), int(parts[1]), int(parts[2]))
+        parts = date.split("-")
+        d = Date(int(parts[0]), int(parts[1]), int(parts[2]))
     except (ValueError, IndexError):
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
@@ -201,7 +201,7 @@ async def api_easter(
 ):
     """Get the date of Easter (Ostersonntag) for a given year."""
     if year is None:
-        year = date.today().year
+        year = Date.today().year
     from app.feiertage import ostern as calc_ostern
     o = calc_ostern(year)
     data = o.to_dict()
@@ -211,9 +211,9 @@ async def api_easter(
 
 @app.get("/api/isFeiertag", response_model=IsFeiertagResponse)
 async def api_is_feiertag(
-    datum: str = Query(..., alias="date", description="Date in YYYY-MM-DD format"),
+    requested_date: str = Query(..., alias="date", description="Date in YYYY-MM-DD format"),
     region: Optional[str] = Query(None, description="Region name (optional, regions are unique across countries)"),
-    inkl_sonntage: bool = Query(False, description="Include Sundays"),
+    include_sundays: bool = Query(False, alias="includeSundays", description="Include Sundays"),
     fmt: str = Query("json", alias="format", description=FORMAT_DESCRIPTION),
 ):
     """Check whether a given date is a public holiday.
@@ -226,12 +226,12 @@ async def api_is_feiertag(
     - /api/isFeiertag?date=2026-04-06&region=Niederösterreich
     """
     try:
-        parts = datum.split("-")
-        d = date(int(parts[0]), int(parts[1]), int(parts[2]))
+        parts = requested_date.split("-")
+        d = Date(int(parts[0]), int(parts[1]), int(parts[2]))
     except (ValueError, IndexError):
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-    data = is_feiertag(d, region, inkl_sonntage)
+    data = is_feiertag(d, region, include_sundays)
     body, content_type = format_response(data, fmt)
     return Response(content=body, media_type=content_type)
 

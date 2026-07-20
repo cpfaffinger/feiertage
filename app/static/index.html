@@ -196,7 +196,7 @@
         (function() {
             var endpoints = [
                 { route: '/api/regions?year=2026', hint: 'Alle Regionen & Feiertage' },
-                { route: '/api/region/{name}?year=2026', hint: 'Eine Region' },
+                { route: '/api/region/{regionName}?year=2026', hint: 'Eine Region' },
                 { route: '/api/feiertage?year=2026', hint: 'Alle Feiertage eines Jahres' },
                 { route: '/api/feiertage/2026-12-25', hint: 'Feiertage an einem Datum' },
                 { route: '/api/isFeiertag?date=2026-11-15&region=Niederösterreich', hint: 'Ist ein Datum ein Feiertag?' },
@@ -277,9 +277,9 @@
             var box = document.getElementById('result-box');
             var url;
             if (region) {
-                url = '/api/region/' + encodeURIComponent(region) + '?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
+                url = '/api/region/' + encodeURIComponent(region) + '?year=' + year + '&includeSundays=' + sunday + '&format=' + fmt;
             } else {
-                url = '/api/regions?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
+                url = '/api/regions?year=' + year + '&includeSundays=' + sunday + '&format=' + fmt;
             }
             box.textContent = 'Loading...';
             box.className = 'result-box';

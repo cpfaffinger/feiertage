@@ -70,7 +70,7 @@ class TestApiRegions:
         assert len(data["regions"]) == 10
 
     def test_regions_with_sundays(self):
-        response = client.get("/api/regions?year=2020&inkl_sonntage=true")
+        response = client.get("/api/regions?year=2020&includeSundays=true")
         assert response.status_code == 200
 
     def test_regions_structure(self):
@@ -117,7 +117,7 @@ class TestApiRegion:
         assert response.status_code == 404
 
     def test_alle_2016(self):
-        response = client.get("/api/region/Alle?year=2016&inkl_sonntage=true")
+        response = client.get("/api/region/Alle?year=2016&includeSundays=true")
         assert response.status_code == 200
         data = response.json()
         assert len(data["feiertage"]) == 81
@@ -125,15 +125,15 @@ class TestApiRegion:
 
 class TestApiFeiertage:
     def test_all_2016(self):
-        # Without inkl_sonntage the no-region path must NOT include Sundays.
+        # Without includeSundays the no-region path must NOT include Sundays.
         response = client.get("/api/feiertage?year=2016")
         assert response.status_code == 200
         data = response.json()
         assert data["count"] == 69
 
-    def test_all_2016_inkl_sonntage(self):
-        # inkl_sonntage must be honoured on the no-region path.
-        response = client.get("/api/feiertage?year=2016&inkl_sonntage=true")
+    def test_all_2016_include_sundays(self):
+        # includeSundays must be honoured on the no-region path.
+        response = client.get("/api/feiertage?year=2016&includeSundays=true")
         assert response.status_code == 200
         data = response.json()
         assert data["count"] == 81
@@ -246,7 +246,7 @@ class TestApiIsFeiertag:
         assert response.status_code == 400
 
     def test_with_sundays(self):
-        response = client.get("/api/isFeiertag?date=2026-04-05&region=Brandenburg&inkl_sonntage=true")
+        response = client.get("/api/isFeiertag?date=2026-04-05&region=Brandenburg&includeSundays=true")
         assert response.status_code == 200
         data = response.json()
         assert data["is_feiertag"] is True
@@ -309,6 +309,21 @@ class TestUnifiedSchema:
             assert name in schemas
         ref = data["paths"]["/api/regions"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
         assert ref.endswith("RegionsResponse")
+
+    def test_openapi_uses_english_camel_case_parameters(self):
+        data = client.get("/openapi.json").json()
+        expected_parameters = {
+            "/api/regions": {"year", "includeSundays", "country", "format"},
+            "/api/region/{regionName}": {"regionName", "year", "includeSundays", "format"},
+            "/api/feiertage": {"year", "region", "includeSundays", "format"},
+            "/api/feiertage/{date}": {"date", "format"},
+            "/api/easter": {"year", "format"},
+            "/api/isFeiertag": {"date", "region", "includeSundays", "format"},
+        }
+
+        for path, expected in expected_parameters.items():
+            parameters = data["paths"][path]["get"]["parameters"]
+            assert {parameter["name"] for parameter in parameters} == expected
 
 
 class TestHealth:

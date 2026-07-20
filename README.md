@@ -48,7 +48,7 @@ Alle Endpunkte unterstützen den `?format=` Parameter: `json` (default), `xml`, 
 | `GET` | `/openapi.json` | OpenAPI Schema |
 | `GET` | `/api/regions?year=2026` | Alle Regionen mit Feiertagen |
 | `GET` | `/api/regions?year=2026&country=de` | Nur DE-Regionen |
-| `GET` | `/api/regions?year=2026&inkl_sonntage=true` | Inklusive Sonntage |
+| `GET` | `/api/regions?year=2026&includeSundays=true` | Inklusive Sonntage |
 | `GET` | `/api/region/Bayern?year=2026` | Feiertage einer Region |
 | `GET` | `/api/feiertage?year=2026` | Alle Feiertage eines Jahres |
 | `GET` | `/api/feiertage?year=2026&region=Berlin` | Nach Region gefiltert |

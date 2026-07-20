@@ -40,7 +40,7 @@ class RegionsResponse(BaseModel):
 
 
 class RegionResponse(BaseModel):
-    """Response of GET /api/region/{name} and GET /api/feiertage."""
+    """Response of GET /api/region/{regionName} and GET /api/feiertage."""
     year: int = Field(..., description="Queried year", examples=[2026])
     region: str = Field(..., description="Full region name", examples=["Bayern"])
     shortname: str = Field(..., description="Region short code", examples=["BY"])
@@ -49,7 +49,7 @@ class RegionResponse(BaseModel):
 
 
 class DateFeiertageResponse(BaseModel):
-    """Response of GET /api/feiertage/{datum}."""
+    """Response of GET /api/feiertage/{date}."""
     date: str = Field(..., description="Queried date (YYYY-MM-DD)", examples=["2026-12-25"])
     count: int = Field(..., description="Number of holidays on that date", examples=[1])
     feiertage: List[Feiertag] = Field(..., description="Holidays on that date")

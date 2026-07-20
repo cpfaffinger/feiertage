@@ -16,8 +16,7 @@
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg); color: var(--text); line-height: 1.65;
-            min-height: 100vh;
+            background: var(--bg); color: var(--text); line-height: 1.65; min-height: 100vh;
         }
         .hero {
             text-align: center; padding: 100px 24px 70px; position: relative;
@@ -47,9 +46,7 @@
             background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
             color: var(--accent-text);
         }
-
         .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 60px; }
-
         section { margin: 40px 0; }
         .section-label {
             font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
@@ -57,7 +54,6 @@
         }
         h2 { font-size: 1.35rem; font-weight: 600; color: var(--text-heading); margin-bottom: 8px; letter-spacing: -0.01em; }
         .sub { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 20px; }
-
         .endpoint-list { display: flex; flex-direction: column; gap: 2px; }
         .ep {
             display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 10px;
@@ -74,7 +70,6 @@
             color: var(--text-heading); flex: 1; word-break: break-all;
         }
         .ep .hint { font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
         .card {
             background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
@@ -83,7 +78,6 @@
         .card:hover { border-color: var(--border-hover); background: var(--surface-hover); }
         .card h3 { font-size: 0.95rem; font-weight: 600; color: var(--text-heading); margin-bottom: 6px; }
         .card .meta { font-size: 0.82rem; color: var(--text-dim); }
-
         .try-area { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
         .try-area select, .try-area input {
             background: var(--surface); color: var(--text); border: 1px solid var(--border);
@@ -97,14 +91,12 @@
         .try-area input[type="number"] { width: 90px; }
         .try-area label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-dim); cursor: pointer; }
         .try-area input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
-
         .btn {
             background: var(--accent); color: #fff; border: none; padding: 10px 22px;
             border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 600; cursor: pointer;
             transition: background 0.2s, box-shadow 0.2s;
         }
         .btn:hover { background: #4f46e5; box-shadow: 0 0 20px var(--accent-glow); }
-
         .result-box {
             background: #060a12; border: 1px solid var(--border); border-radius: var(--radius-sm);
             padding: 18px; font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.8rem;
@@ -112,19 +104,16 @@
             line-height: 1.5;
         }
         .result-box.empty { color: var(--text-dim); font-style: italic; }
-
-        .links-row { display: flex; gap: 16px; align-items: center; }
+        .links-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
         .links-row a {
             display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
             border-radius: var(--radius-sm); border: 1px solid var(--border);
             color: var(--text); text-decoration: none; font-size: 0.88rem; transition: all 0.2s;
         }
         .links-row a:hover { border-color: var(--accent); color: var(--accent-text); background: rgba(99,102,241,0.05); }
-
         footer { text-align: center; padding: 40px 24px; color: #3a4560; font-size: 0.82rem; border-top: 1px solid var(--border); }
         footer a { color: var(--accent-text); text-decoration: none; }
         footer a:hover { text-decoration: underline; }
-
         @media (max-width: 600px) {
             .ep { flex-wrap: wrap; gap: 6px; }
             .ep .hint { width: 100%; }
@@ -150,127 +139,14 @@
             <div class="section-label">Endpoints</div>
             <h2>REST API</h2>
             <p class="sub">Alle Endpunkte akzeptieren <code style="color:var(--accent-text)">?format=json|xml|csv|tsv|txt</code></p>
-            <div class="endpoint-list">
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/regions?year=2026</span>
-                    <span class="hint">Alle Regionen &amp; Feiertage</span>
-                </div>
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/region/{name}?year=2026</span>
-                    <span class="hint">Eine Region</span>
-                </div>
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/feiertage?year=2026</span>
-                    <span class="hint">Alle Feiertage eines Jahres</span>
-                </div>
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/feiertage/2026-12-25</span>
-                    <span class="hint">Feiertage an einem Datum</span>
-                </div>
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/isFeiertag?date=2026-11-15&amp;region=Niederoesterreich</span>
-                    <span class="hint">Ist ein Datum ein Feiertag?</span>
-                </div>
-                <div class="ep">
-                    <span class="verb">GET</span>
-                    <span class="route">/api/easter?year=2026</span>
-                    <span class="hint">Osterdatum (Gauss)</span>
-                </div>
-            </div>
+            <div class="endpoint-list" id="endpoint-list"></div>
         </section>
 
         <section>
             <div class="section-label">Regions</div>
             <h2>Verfugbare Regionen</h2>
             <p class="sub">16 deutsche und 9 osterreichische Bundeslander + Sonderregionen</p>
-            <div class="grid">
-                <div class="card">
-                    <h3>Baden-Wurttemberg</h3><div class="meta">BW &middot; 12 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Bayern</h3><div class="meta">BY &middot; 12 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Berlin</h3><div class="meta">BE &middot; 11 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Brandenburg</h3><div class="meta">BB &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Bremen</h3><div class="meta">HB &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Hamburg</h3><div class="meta">HH &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Hessen</h3><div class="meta">HE &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Mecklenburg-Vorpommern</h3><div class="meta">MV &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Niedersachsen</h3><div class="meta">NI &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Nordrhein-Westfalen</h3><div class="meta">NW &middot; 11 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Rheinland-Pfalz</h3><div class="meta">RP &middot; 11 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Saarland</h3><div class="meta">SL &middot; 12 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Sachsen</h3><div class="meta">SN &middot; 11 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Sachsen-Anhalt</h3><div class="meta">ST &middot; 11 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Schleswig-Holstein</h3><div class="meta">SH &middot; 10 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Thuringen</h3><div class="meta">TH &middot; 10 Feiertage</div>
-                </div>
-                <div class="card" style="border-color: rgba(99,102,241,0.25); background: rgba(99,102,241,0.05);">
-                    <h3>Deutschland</h3><div class="meta">DE &middot; 9 gemeinsame Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Burgenland</h3><div class="meta">Bgld &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Karnten</h3><div class="meta">Ktn &middot; 15 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Niederosterreich</h3><div class="meta">NO &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Oberosterreich</h3><div class="meta">OO &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Salzburg</h3><div class="meta">Sbg &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Steiermark</h3><div class="meta">Stmk &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Tirol</h3><div class="meta">T &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Vorarlberg</h3><div class="meta">Vbg &middot; 14 Feiertage</div>
-                </div>
-                <div class="card">
-                    <h3>Wien</h3><div class="meta">W &middot; 14 Feiertage</div>
-                </div>
-                <div class="card" style="border-color: rgba(99,102,241,0.25); background: rgba(99,102,241,0.05);">
-                    <h3>Osterreich</h3><div class="meta">AT &middot; 13 gemeinsame Feiertage</div>
-                </div>
-            </div>
+            <div class="grid" id="region-grid"></div>
         </section>
 
         <section>
@@ -300,19 +176,81 @@
             <h2>Swagger &amp; OpenAPI</h2>
             <p class="sub">Interaktive API-Dokumentation &mdash; alle Endpunkte direkt ausprobierbar.</p>
             <div class="links-row">
-                <a href="/docs">&#x1F4D6; Swagger UI &rarr;</a>
-                <a href="/redoc">&#x1F4C4; ReDoc &rarr;</a>
-                <a href="/openapi.json">&#x1F4E6; OpenAPI JSON &rarr;</a>
+                <a href="/docs">&#x1F4D6; Swagger UI</a>
+                <a href="/redoc">&#x1F4C4; ReDoc</a>
+                <a href="/openapi.json">&#x1F4E6; OpenAPI JSON</a>
             </div>
         </section>
     </div>
 
     <footer>
-        Feiertage API v1.1.0 &mdash; Free &amp; Open &mdash; <a href="https://github.com/cpfaffinger/feiertage">GitHub</a>
+        Feiertage API v1.2.1 &mdash; Free &amp; Open &mdash; <a href="https://github.com/cpfaffinger/feiertage">GitHub</a>
     </footer>
 
     <script>
-        const regions = [
+        (function() {
+            var endpoints = [
+                { route: '/api/regions?year=2026', hint: 'Alle Regionen & Feiertage' },
+                { route: '/api/region/{name}?year=2026', hint: 'Eine Region' },
+                { route: '/api/feiertage?year=2026', hint: 'Alle Feiertage eines Jahres' },
+                { route: '/api/feiertage/2026-12-25', hint: 'Feiertage an einem Datum' },
+                { route: '/api/isFeiertag?date=2026-11-15&region=Niederoesterreich', hint: 'Ist ein Datum ein Feiertag?' },
+                { route: '/api/easter?year=2026', hint: 'Osterdatum (Gauss)' }
+            ];
+            var list = document.getElementById('endpoint-list');
+            endpoints.forEach(function(ep) {
+                var div = document.createElement('div'); div.className = 'ep';
+                var verb = document.createElement('span'); verb.className = 'verb'; verb.textContent = 'GET';
+                var route = document.createElement('span'); route.className = 'route'; route.textContent = ep.route;
+                var hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = ep.hint;
+                div.appendChild(verb); div.appendChild(route); div.appendChild(hint);
+                list.appendChild(div);
+            });
+        })();
+
+        (function() {
+            var regions = [
+                { n: 'Baden-Wurttemberg', s: 'BW', c: 12 },
+                { n: 'Bayern', s: 'BY', c: 12 },
+                { n: 'Berlin', s: 'BE', c: 11 },
+                { n: 'Brandenburg', s: 'BB', c: 10 },
+                { n: 'Bremen', s: 'HB', c: 10 },
+                { n: 'Hamburg', s: 'HH', c: 10 },
+                { n: 'Hessen', s: 'HE', c: 10 },
+                { n: 'Mecklenburg-Vorpommern', s: 'MV', c: 10 },
+                { n: 'Niedersachsen', s: 'NI', c: 10 },
+                { n: 'Nordrhein-Westfalen', s: 'NW', c: 11 },
+                { n: 'Rheinland-Pfalz', s: 'RP', c: 11 },
+                { n: 'Saarland', s: 'SL', c: 12 },
+                { n: 'Sachsen', s: 'SN', c: 11 },
+                { n: 'Sachsen-Anhalt', s: 'ST', c: 11 },
+                { n: 'Schleswig-Holstein', s: 'SH', c: 10 },
+                { n: 'Thuringen', s: 'TH', c: 10 },
+                { n: 'Deutschland', s: 'DE', c: 9, hl: true },
+                { n: 'Burgenland', s: 'Bgld', c: 14 },
+                { n: 'Karnten', s: 'Ktn', c: 15 },
+                { n: 'Niederosterreich', s: 'NO', c: 14 },
+                { n: 'Oberosterreich', s: 'OO', c: 14 },
+                { n: 'Salzburg', s: 'Sbg', c: 14 },
+                { n: 'Steiermark', s: 'Stmk', c: 14 },
+                { n: 'Tirol', s: 'T', c: 14 },
+                { n: 'Vorarlberg', s: 'Vbg', c: 14 },
+                { n: 'Wien', s: 'W', c: 14 },
+                { n: 'Osterreich', s: 'AT', c: 13, hl: true }
+            ];
+            var grid = document.getElementById('region-grid');
+            regions.forEach(function(r) {
+                var card = document.createElement('div'); card.className = 'card';
+                if (r.hl) card.style.cssText = 'border-color:rgba(99,102,241,0.25);background:rgba(99,102,241,0.05)';
+                var h3 = document.createElement('h3'); h3.textContent = r.n;
+                var meta = document.createElement('div'); meta.className = 'meta';
+                meta.textContent = r.s + ' \u00B7 ' + r.c + ' Feiertage';
+                card.appendChild(h3); card.appendChild(meta);
+                grid.appendChild(card);
+            });
+        })();
+
+        var regions = [
             "Baden-Wurttemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg",
             "Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen",
             "Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein",
@@ -320,31 +258,29 @@
             "Oberosterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien",
             "Osterreich","Alle"
         ];
-        const sel = document.getElementById('region-select');
-        regions.forEach(r => {
-            const o = document.createElement('option'); o.value = r; o.textContent = r;
+        var sel = document.getElementById('region-select');
+        regions.forEach(function(r) {
+            var o = document.createElement('option'); o.value = r; o.textContent = r;
             sel.appendChild(o);
         });
 
         async function tryApi() {
-            const region = sel.value;
-            const year = document.getElementById('year-input').value;
-            const sunday = document.getElementById('sunday-check').checked;
-            const fmt = document.getElementById('format-select').value;
-            const box = document.getElementById('result-box');
-
-            let url;
+            var region = sel.value;
+            var year = document.getElementById('year-input').value;
+            var sunday = document.getElementById('sunday-check').checked;
+            var fmt = document.getElementById('format-select').value;
+            var box = document.getElementById('result-box');
+            var url;
             if (region) {
                 url = '/api/region/' + encodeURIComponent(region) + '?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
             } else {
                 url = '/api/regions?year=' + year + '&inkl_sonntage=' + sunday + '&format=' + fmt;
             }
-
             box.textContent = 'Loading...';
             box.className = 'result-box';
             try {
-                const r = await fetch(url);
-                const text = await r.text();
+                var r = await fetch(url);
+                var text = await r.text();
                 box.textContent = text;
             } catch(e) {
                 box.textContent = 'Error: ' + e.message;

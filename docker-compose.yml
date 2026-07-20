@@ -6,4 +6,5 @@ services:
       - "${FEIERTAGE_WEB_PORT:-8000}:8000"
     environment:
       - FEIERTAGE_WEB_PORT=${FEIERTAGE_WEB_PORT:-8000}
+      - ROOT_PATH=${ROOT_PATH:-}
     restart: unless-stopped

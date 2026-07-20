@@ -7,9 +7,11 @@ No authentication required - completely open and public.
 
 Supported output formats: json, xml, csv, tsv, txt
 """
+import os
 from datetime import date
 from typing import Optional
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from app.region import (
@@ -20,13 +22,27 @@ from app.region import (
 )
 from app.formatter import format_response, AVAILABLE_FORMATS
 
+_root_path = os.environ.get("ROOT_PATH", "")
+
 app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="1.2.0",
+    version="1.2.1",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
+    root_path=_root_path,
+    openapi_url="/openapi.json" if not _root_path else f"{_root_path}/openapi.json",
+    docs_url="/docs" if not _root_path else f"{_root_path}/docs",
+    redoc_url="/redoc" if not _root_path else f"{_root_path}/redoc",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -177,3 +193,9 @@ async def api_is_feiertag(
     data = is_feiertag(d, region, inkl_sonntage)
     body, content_type = format_response(data, fmt)
     return Response(content=body, media_type=content_type)
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint."""
+    return {"status": "ok"}

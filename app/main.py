@@ -38,7 +38,7 @@ app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="2.0.0",
+    version="3.0.0",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
     openapi_url="/openapi.json",

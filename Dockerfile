@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-ARG VERSION=2.0.0
+ARG VERSION=3.0.0
 
 WORKDIR /app
 

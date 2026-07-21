@@ -17,11 +17,14 @@ class Feiertag(BaseModel):
     name: str = Field(..., description="Name of the holiday", examples=["Neujahr"])
 
 
-class FeiertagInRegion(BaseModel):
+class HolidayInRegion(BaseModel):
     """A holiday together with the region it applies to."""
     name: str = Field(..., description="Name of the holiday", examples=["Leopolditag"])
     region: str = Field(..., description="Full region name", examples=["Niederösterreich"])
-    region_short: str = Field(..., description="Region short code", examples=["NÖ"])
+    regionShort: str = Field(..., description="Region short code", examples=["NÖ"])
+    isPublicHoliday: bool = Field(..., description="Whether broad statutory holiday rest applies", examples=[False])
+    isLimitedHoliday: bool = Field(..., description="Whether the holiday applies only to a limited group", examples=[True])
+    scope: Optional[str] = Field(None, description="People covered when this is a limited holiday")
 
 
 class RegionFeiertage(BaseModel):
@@ -64,8 +67,9 @@ class EasterResponse(BaseModel):
 class IsFeiertagResponse(BaseModel):
     """Response of GET /api/isFeiertag."""
     date: str = Field(..., description="Queried date (YYYY-MM-DD)", examples=["2026-11-15"])
-    is_feiertag: bool = Field(..., description="Whether the date is a public holiday", examples=[True])
-    feiertage: List[FeiertagInRegion] = Field(..., description="Matching holidays with their region")
+    isPublicHoliday: bool = Field(..., description="Whether the date is a broadly applicable public holiday", examples=[False])
+    isLimitedHoliday: bool = Field(..., description="Whether the date is a holiday for a limited group", examples=[True])
+    holidays: List[HolidayInRegion] = Field(..., description="Matching holidays, regions and applicability")
     error: Optional[str] = Field(None, description="Error message, e.g. when the region is unknown")
 
 

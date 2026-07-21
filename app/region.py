@@ -342,6 +342,22 @@ _ALL_REGIONS = {
 }
 
 
+# Austrian state patron days and Carinthia's referendum day are school-free
+# under the applicable school-time laws, but are not general paid public
+# holidays under § 7 of the Austrian Arbeitsruhegesetz (ARG).
+_LIMITED_HOLIDAYS = {
+    "Bgld": {"Martinstag"},
+    "Ktn": {"Josefitag", "Tag der Volksabstimmung"},
+    "NÖ": {"Leopolditag"},
+    "OÖ": {"Florianitag"},
+    "Sbg": {"Rupertitag"},
+    "Stmk": {"Josefitag"},
+    "T": {"Josefitag"},
+    "Vbg": {"Josefitag"},
+    "W": {"Leopolditag"},
+}
+
+
 def _canonicalize(s: str) -> str:
     return s.lower().replace("-", "").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
 
@@ -396,23 +412,57 @@ def get_feiertage_for_date(d: date) -> list:
     return result
 
 
-def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -> dict:
-    """Check whether a date is a holiday, optionally filtered by region.
+def _holiday_match(feiertag: Feiertag, region: Region) -> dict:
+    """Describe one regional occurrence and its public-holiday status."""
+    is_limited = feiertag.name in _LIMITED_HOLIDAYS.get(region.shortname, set())
+    scope = None
+    if is_limited:
+        scope = (
+            f"Primarily pupils and teaching staff at schools in {region.name}; "
+            "applicability may vary by school type. It is not a general work-free day."
+        )
+    return {
+        "name": feiertag.name,
+        "region": region.name,
+        "regionShort": region.shortname,
+        "isPublicHoliday": not is_limited,
+        "isLimitedHoliday": is_limited,
+        "scope": scope,
+    }
 
-    Returns a dict with keys: date, is_feiertag, feiertage (list of {name, region}).
-    If region_name is given, feiertage are specific to that region.
-    Otherwise checks all regions.
+
+def _holiday_check_response(d: date, matches: list[dict], error: str = None) -> dict:
+    """Build the unified response for a public/limited holiday check."""
+    response = {
+        "date": d.isoformat(),
+        "isPublicHoliday": any(item["isPublicHoliday"] for item in matches),
+        "isLimitedHoliday": any(item["isLimitedHoliday"] for item in matches),
+        "holidays": matches,
+    }
+    if error is not None:
+        response["error"] = error
+    return response
+
+
+def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -> dict:
+    """Check whether a date is a public or limited holiday.
+
+    Public holidays provide broad statutory holiday rest. Limited holidays
+    apply only to the scope stated on the matching occurrence.
     """
     if region_name:
         r = get_region(region_name, d.year, inkl_sonntage)
         if r is None:
-            return {"date": d.isoformat(), "is_feiertag": False, "feiertage": [], "error": f"Region '{region_name}' not found"}
+            return _holiday_check_response(d, [], f"Region '{region_name}' not found")
+
+        # "Alle" is a calendar of holidays and other observances, not a
+        # jurisdiction. Resolve it through the real regions so observances do
+        # not become public holidays merely because they occur in that list.
+        if r.shortname == "All":
+            return is_feiertag(d, None, inkl_sonntage)
+
         matching = [f for f in r.feiertage if f.datum == d]
-        return {
-            "date": d.isoformat(),
-            "is_feiertag": len(matching) > 0,
-            "feiertage": [{"name": f.name, "region": r.name, "region_short": r.shortname} for f in matching],
-        }
+        return _holiday_check_response(d, [_holiday_match(f, r) for f in matching])
 
     all_regions = get_all_regions(d.year, inkl_sonntage)
     results = []
@@ -421,14 +471,6 @@ def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -
             continue
         for f in reg.feiertage:
             if f.datum == d:
-                results.append({
-                    "name": f.name,
-                    "region": reg.name,
-                    "region_short": reg.shortname,
-                })
+                results.append(_holiday_match(f, reg))
 
-    return {
-        "date": d.isoformat(),
-        "is_feiertag": len(results) > 0,
-        "feiertage": results,
-    }
+    return _holiday_check_response(d, results)

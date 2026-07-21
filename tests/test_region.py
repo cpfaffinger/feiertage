@@ -395,33 +395,46 @@ class TestIsFeiertag:
         from app.region import is_feiertag
         d = datetime.date(2026, 1, 1)
         result = is_feiertag(d, "Bayern")
-        assert result["is_feiertag"] is True
-        assert result["feiertage"][0]["name"] == "Neujahr"
-        assert result["feiertage"][0]["region"] == "Bayern"
+        assert result["isPublicHoliday"] is True
+        assert result["isLimitedHoliday"] is False
+        assert result["holidays"][0]["name"] == "Neujahr"
+        assert result["holidays"][0]["region"] == "Bayern"
 
     def test_not_feiertag_with_region(self):
         from app.region import is_feiertag
         d = datetime.date(2026, 7, 3)
         result = is_feiertag(d, "Bayern")
-        assert result["is_feiertag"] is False
+        assert result["isPublicHoliday"] is False
+        assert result["isLimitedHoliday"] is False
 
     def test_invalid_region(self):
         from app.region import is_feiertag
         d = datetime.date(2026, 1, 1)
         result = is_feiertag(d, "InvalidRegion")
-        assert result["is_feiertag"] is False
+        assert result["isPublicHoliday"] is False
+        assert result["isLimitedHoliday"] is False
         assert "error" in result
 
     def test_feiertag_all_regions(self):
         from app.region import is_feiertag
         d = datetime.date(2026, 12, 25)
         result = is_feiertag(d)
-        assert result["is_feiertag"] is True
-        names = [f["name"] for f in result["feiertage"]]
+        assert result["isPublicHoliday"] is True
+        assert result["isLimitedHoliday"] is False
+        names = [f["name"] for f in result["holidays"]]
         assert "Weihnachten" in names or "Christtag" in names
 
     def test_not_feiertag_all_regions(self):
         from app.region import is_feiertag
         d = datetime.date(2026, 7, 3)
         result = is_feiertag(d)
-        assert result["is_feiertag"] is False
+        assert result["isPublicHoliday"] is False
+        assert result["isLimitedHoliday"] is False
+
+    def test_limited_holiday(self):
+        from app.region import is_feiertag
+        d = datetime.date(2026, 11, 15)
+        result = is_feiertag(d, "Niederösterreich")
+        assert result["isPublicHoliday"] is False
+        assert result["isLimitedHoliday"] is True
+        assert result["holidays"][0]["scope"]

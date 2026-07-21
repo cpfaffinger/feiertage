@@ -53,10 +53,52 @@ Alle Endpunkte unterstützen den `?format=` Parameter: `json` (default), `xml`, 
 | `GET` | `/api/feiertage?year=2026` | Alle Feiertage eines Jahres |
 | `GET` | `/api/feiertage?year=2026&region=Berlin` | Nach Region gefiltert |
 | `GET` | `/api/feiertage/2026-12-25` | Feiertage an einem Datum |
+| `GET` | `/api/isFeiertag?date=2026-11-15&region=Niederösterreich` | Feiertagsstatus mit Geltungsbereich |
 | `GET` | `/api/easter?year=2026` | Osterdatum (Gauß) |
 
 > `year` ist optional und fällt auf das aktuelle Jahr zurück. Die JSON-Response-Schemas
 > aller Endpunkte sind in Swagger UI und ReDoc dokumentiert.
+
+### Allgemeine und eingeschränkte Feiertage
+
+`GET /api/isFeiertag` unterscheidet zwischen allgemein geltenden gesetzlichen
+Feiertagen (`isPublicHoliday`) und Feiertagen, die nur eingeschränkte
+Personengruppen betreffen (`isLimitedHoliday`). Bei eingeschränkten Feiertagen
+beschreibt `scope` den typischen Geltungsbereich. Die konkrete Anwendbarkeit kann
+je nach Schulart oder Dienstrecht abweichen.
+
+```json
+{
+  "date": "2026-11-15",
+  "isPublicHoliday": false,
+  "isLimitedHoliday": true,
+  "holidays": [
+    {
+      "name": "Leopolditag",
+      "region": "Niederösterreich",
+      "regionShort": "NÖ",
+      "isPublicHoliday": false,
+      "isLimitedHoliday": true,
+      "scope": "Primarily pupils and teaching staff at schools in Niederösterreich; applicability may vary by school type. It is not a general work-free day."
+    }
+  ]
+}
+```
+
+Als eingeschränkt werden derzeit die in der API enthaltenen österreichischen
+Landespatronstage sowie der Kärntner Tag der Volksabstimmung geführt:
+
+- Josefitag: Kärnten, Steiermark, Tirol und Vorarlberg
+- Florianitag: Oberösterreich
+- Rupertitag: Salzburg
+- Tag der Volksabstimmung: Kärnten
+- Martinstag: Burgenland
+- Leopolditag: Niederösterreich und Wien
+
+Grundlage der Abgrenzung sind insbesondere die abschließende Feiertagsliste in
+[§ 7 Arbeitsruhegesetz](https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10008541&Paragraf=7)
+und die Regelungen zu schulfreien Landespatronstagen im
+[Schulzeitgesetz 1985](https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10009575).
 
 ### Format-Beispiele
 

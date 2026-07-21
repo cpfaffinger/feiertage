@@ -207,33 +207,82 @@ class TestApiIsFeiertag:
         response = client.get("/api/isFeiertag?date=2026-01-01")
         assert response.status_code == 200
         data = response.json()
-        assert data["is_feiertag"] is True
-        names = [f["name"] for f in data["feiertage"]]
+        assert data["isPublicHoliday"] is True
+        assert data["isLimitedHoliday"] is False
+        names = [f["name"] for f in data["holidays"]]
         assert "Neujahr" in names
 
     def test_neujahr_with_region(self):
         response = client.get("/api/isFeiertag?date=2026-01-01&region=Bayern")
         assert response.status_code == 200
         data = response.json()
-        assert data["is_feiertag"] is True
-        assert len(data["feiertage"]) == 1
-        assert data["feiertage"][0]["name"] == "Neujahr"
-        assert data["feiertage"][0]["region"] == "Bayern"
+        assert data["isPublicHoliday"] is True
+        assert data["isLimitedHoliday"] is False
+        assert len(data["holidays"]) == 1
+        assert data["holidays"][0]["name"] == "Neujahr"
+        assert data["holidays"][0]["region"] == "Bayern"
+        assert data["holidays"][0]["scope"] is None
 
     def test_not_a_feiertag(self):
         response = client.get("/api/isFeiertag?date=2026-07-03")
         assert response.status_code == 200
         data = response.json()
-        assert data["is_feiertag"] is False
-        assert len(data["feiertage"]) == 0
+        assert data["isPublicHoliday"] is False
+        assert data["isLimitedHoliday"] is False
+        assert len(data["holidays"]) == 0
 
-    def test_niederoesterreich_feiertag(self):
+    def test_niederoesterreich_leopolditag_is_limited(self):
         response = client.get("/api/isFeiertag?date=2026-11-15&region=Niederösterreich")
         assert response.status_code == 200
         data = response.json()
-        assert data["is_feiertag"] is True
-        names = [f["name"] for f in data["feiertage"]]
-        assert "Leopolditag" in names
+        assert data["isPublicHoliday"] is False
+        assert data["isLimitedHoliday"] is True
+        assert data["holidays"][0]["name"] == "Leopolditag"
+        assert data["holidays"][0]["isPublicHoliday"] is False
+        assert data["holidays"][0]["isLimitedHoliday"] is True
+        assert "pupils and teaching staff" in data["holidays"][0]["scope"]
+
+    @pytest.mark.parametrize(
+        ("date_value", "region", "name"),
+        [
+            ("2026-03-19", "Kärnten", "Josefitag"),
+            ("2026-03-19", "Steiermark", "Josefitag"),
+            ("2026-03-19", "Tirol", "Josefitag"),
+            ("2026-03-19", "Vorarlberg", "Josefitag"),
+            ("2026-05-04", "Oberösterreich", "Florianitag"),
+            ("2026-09-24", "Salzburg", "Rupertitag"),
+            ("2026-10-10", "Kärnten", "Tag der Volksabstimmung"),
+            ("2026-11-11", "Burgenland", "Martinstag"),
+            ("2026-11-15", "Niederösterreich", "Leopolditag"),
+            ("2026-11-15", "Wien", "Leopolditag"),
+        ],
+    )
+    def test_all_limited_holiday_types(self, date_value, region, name):
+        response = client.get(f"/api/isFeiertag?date={date_value}&region={region}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["isPublicHoliday"] is False
+        assert data["isLimitedHoliday"] is True
+        assert data["holidays"][0]["name"] == name
+        assert data["holidays"][0]["scope"]
+
+    def test_limited_holiday_without_region(self):
+        response = client.get("/api/isFeiertag?date=2026-11-15")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["isPublicHoliday"] is False
+        assert data["isLimitedHoliday"] is True
+        assert {holiday["region"] for holiday in data["holidays"]} == {
+            "Niederösterreich", "Wien"
+        }
+
+    def test_all_region_does_not_promote_observances_to_holidays(self):
+        response = client.get("/api/isFeiertag?date=2026-02-14&region=Alle")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["isPublicHoliday"] is False
+        assert data["isLimitedHoliday"] is False
+        assert data["holidays"] == []
 
     def test_invalid_region(self):
         response = client.get("/api/isFeiertag?date=2026-01-01&region=InvalidRegion")
@@ -249,7 +298,7 @@ class TestApiIsFeiertag:
         response = client.get("/api/isFeiertag?date=2026-04-05&region=Brandenburg&includeSundays=true")
         assert response.status_code == 200
         data = response.json()
-        assert data["is_feiertag"] is True
+        assert data["isPublicHoliday"] is True
 
     def test_format_xml(self):
         response = client.get("/api/isFeiertag?date=2026-01-01&format=xml")
@@ -260,6 +309,15 @@ class TestApiIsFeiertag:
         response = client.get("/api/isFeiertag?date=2026-01-01&format=csv")
         assert response.status_code == 200
         assert "Neujahr" in response.text
+
+    def test_limited_holiday_csv_includes_status_and_scope(self):
+        response = client.get(
+            "/api/isFeiertag?date=2026-11-15&region=Niederösterreich&format=csv"
+        )
+        assert response.status_code == 200
+        assert "isLimitedHoliday" in response.text
+        assert "scope" in response.text
+        assert "pupils and teaching staff" in response.text
 
 
 class TestYearDefaults:
@@ -307,6 +365,9 @@ class TestUnifiedSchema:
         for name in ["RegionsResponse", "RegionResponse", "DateFeiertageResponse",
                      "EasterResponse", "IsFeiertagResponse", "Feiertag"]:
             assert name in schemas
+        assert set(schemas["IsFeiertagResponse"]["properties"]) == {
+            "date", "isPublicHoliday", "isLimitedHoliday", "holidays", "error"
+        }
         ref = data["paths"]["/api/regions"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
         assert ref.endswith("RegionsResponse")
 

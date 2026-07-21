@@ -97,6 +97,20 @@ def _flatten_for_tabular(data: dict) -> list:
     """Extract feiertage entries into a flat list for CSV/TSV output."""
     entries = []
 
+    holidays = data.get("holidays")
+    if holidays:
+        for holiday in holidays:
+            entries.append({
+                "date": data.get("date", ""),
+                "name": holiday.get("name", ""),
+                "region": holiday.get("region", ""),
+                "regionShort": holiday.get("regionShort", ""),
+                "isPublicHoliday": holiday.get("isPublicHoliday", False),
+                "isLimitedHoliday": holiday.get("isLimitedHoliday", False),
+                "scope": holiday.get("scope", ""),
+            })
+        return entries
+
     feiertage = data.get("feiertage", [])
     if feiertage:
         for f in feiertage:

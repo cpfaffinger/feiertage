@@ -32,6 +32,21 @@ REGIONS_DATA = {
         }
     ],
 }
+HOLIDAY_STATUS_DATA = {
+    "date": "2026-11-15",
+    "isPublicHoliday": False,
+    "isLimitedHoliday": True,
+    "holidays": [
+        {
+            "name": "Leopolditag",
+            "region": "Niederösterreich",
+            "regionShort": "NÖ",
+            "isPublicHoliday": False,
+            "isLimitedHoliday": True,
+            "scope": "Pupils and teaching staff",
+        }
+    ],
+}
 
 
 class TestNormalize:
@@ -117,6 +132,12 @@ class TestToCsv:
         lines = result.strip().split("\r\n")
         assert len(lines) >= 3
         assert "region" in lines[0]
+
+    def test_holiday_status_preserves_scope(self):
+        result = to_csv(HOLIDAY_STATUS_DATA)
+        assert "isLimitedHoliday" in result
+        assert "Pupils and teaching staff" in result
+        assert "Niederösterreich" in result
 
     def test_simple_date(self):
         result = to_csv(SIMPLE_DATA)
@@ -238,6 +259,12 @@ class TestFlattenForTabular:
         assert len(result) == 2
         assert result[0]["region"] == "Bayern"
         assert result[0]["region_short"] == "BY"
+
+    def test_holiday_status_list(self):
+        result = _flatten_for_tabular(HOLIDAY_STATUS_DATA)
+        assert result[0]["date"] == "2026-11-15"
+        assert result[0]["isLimitedHoliday"] is True
+        assert result[0]["scope"] == "Pupils and teaching staff"
 
     def test_simple_data(self):
         result = _flatten_for_tabular(SIMPLE_DATA)

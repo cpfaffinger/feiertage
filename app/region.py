@@ -444,7 +444,7 @@ def _holiday_check_response(d: date, matches: list[dict], error: str = None) -> 
     return response
 
 
-def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -> dict:
+def get_holiday_status(d: date, region_name: str = None, inkl_sonntage: bool = False) -> dict:
     """Check whether a date is a public or limited holiday.
 
     Public holidays provide broad statutory holiday rest. Limited holidays
@@ -459,7 +459,7 @@ def is_feiertag(d: date, region_name: str = None, inkl_sonntage: bool = False) -
         # jurisdiction. Resolve it through the real regions so observances do
         # not become public holidays merely because they occur in that list.
         if r.shortname == "All":
-            return is_feiertag(d, None, inkl_sonntage)
+            return get_holiday_status(d, None, inkl_sonntage)
 
         matching = [f for f in r.feiertage if f.datum == d]
         return _holiday_check_response(d, [_holiday_match(f, r) for f in matching])

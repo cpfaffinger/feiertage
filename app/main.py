@@ -19,7 +19,7 @@ from app.region import (
     get_all_regions,
     get_region,
     get_feiertage_for_date,
-    is_feiertag,
+    get_holiday_status,
 )
 from app.formatter import format_response, AVAILABLE_FORMATS
 from app.schemas import (
@@ -38,7 +38,7 @@ app = FastAPI(
     title="Feiertage API",
     description="Gesetzliche Feiertage in Deutschland und Österreich. "
                 "Public holiday API for Germany and Austria - open and free for everyone.",
-    version="3.0.0",
+    version="3.0.1",
     contact={"name": "Feiertage API"},
     license_info={"name": "MIT"},
     openapi_url="/openapi.json",
@@ -231,7 +231,7 @@ async def api_is_feiertag(
     except (ValueError, IndexError):
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
 
-    data = is_feiertag(d, region, include_sundays)
+    data = get_holiday_status(d, region, include_sundays)
     body, content_type = format_response(data, fmt)
     return Response(content=body, media_type=content_type)
 

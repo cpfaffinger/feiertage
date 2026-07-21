@@ -202,7 +202,7 @@ class TestApiEaster:
         assert data["name"] == "Ostern"
 
 
-class TestApiIsFeiertag:
+class TestApiHolidayStatus:
     def test_neujahr_no_region(self):
         response = client.get("/api/isFeiertag?date=2026-01-01")
         assert response.status_code == 200
@@ -368,6 +368,7 @@ class TestUnifiedSchema:
         assert set(schemas["IsFeiertagResponse"]["properties"]) == {
             "date", "isPublicHoliday", "isLimitedHoliday", "holidays", "error"
         }
+        assert "is_feiertag" not in schemas["IsFeiertagResponse"]["properties"]
         ref = data["paths"]["/api/regions"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
         assert ref.endswith("RegionsResponse")
 
